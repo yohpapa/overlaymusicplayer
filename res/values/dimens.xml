@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2014 Kensuke Nakai<kemumaki.kemuo@gmail.com>
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<resources>
+
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    
+    <dimen name="overlay_layout_margin">5dp</dimen>
+    
+    <dimen name="overlay_panel_width">250dp</dimen>
+    <dimen name="overlay_panel_height">100dp</dimen>
+    <dimen name="overlay_artwork_size">70dp</dimen>
+    <dimen name="overlay_title_font_size">20sp</dimen>
+    <dimen name="overlay_artist_font_size">15sp</dimen>
+    <dimen name="overlay_button_size">30dp</dimen>
+
+    <dimen name="overlay_open_button_width">30dp</dimen>
+    <dimen name="overlay_open_button_height">100dp</dimen>
+    
+    <dimen name="list_layout_margin">10dp</dimen>
+    <dimen name="list_album_font_size">20sp</dimen>
+    <dimen name="list_artist_font_size">15sp</dimen>
+    <dimen name="list_artwork_size">70dp</dimen>
+
+</resources>
