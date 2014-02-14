@@ -19,6 +19,7 @@ package com.yohpapa.tools;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,17 +35,19 @@ public class MetaDataRetriever extends AsyncTask<Void, Void, MetaDataRetriever.M
         public final String artistName;
         public final String albumName;
         public final Bitmap artwork;
+        public final Bitmap smallArtwork;
 
-        public MetaData(long trackId, String title, String artistName, String albumName, Bitmap artwork) {
+        public MetaData(long trackId, String title, String artistName, String albumName, Bitmap artwork, Bitmap smallArtwork) {
             this.trackId = trackId;
             this.title = title;
             this.artistName = artistName;
             this.albumName = albumName;
             this.artwork = artwork;
+            this.smallArtwork = smallArtwork;
         }
 
         public MetaData deepCopy() {
-        	return new MetaData(this.trackId, this.title, this.artistName, this.albumName, this.artwork);
+        	return new MetaData(this.trackId, this.title, this.artistName, this.albumName, this.artwork, this.smallArtwork);
         }
     }
 
@@ -55,11 +58,13 @@ public class MetaDataRetriever extends AsyncTask<Void, Void, MetaDataRetriever.M
     private final Context context;
     private final long trackId;
     private final OnRetrieveMetaDataFinished onFinished;
+    private final boolean needSmallIcon;
 
-    public MetaDataRetriever(Context context, long trackId, OnRetrieveMetaDataFinished onFinished) {
+    public MetaDataRetriever(Context context, long trackId, OnRetrieveMetaDataFinished onFinished, boolean needSmallIcon) {
         this.context = context;
         this.trackId = trackId;
         this.onFinished = onFinished;
+        this.needSmallIcon = needSmallIcon;
     }
 
     @Override
@@ -105,14 +110,31 @@ public class MetaDataRetriever extends AsyncTask<Void, Void, MetaDataRetriever.M
                         }, null, null, null);
 
                 if(albumCursor == null || !albumCursor.moveToFirst() || albumCursor.getCount() != 1) {
-                    return new MetaData(trackId, title, artist, album, null);
+                    return new MetaData(trackId, title, artist, album, null, null);
                 }
 
                 String artworkPath = CursorHelper.getString(albumCursor, MediaStore.Audio.Albums.ALBUM_ART);
                 artwork = BitmapFactory.decodeFile(artworkPath);
             }
 
-            return new MetaData(trackId, title, artist, album, artwork);
+            Bitmap smallIcon = null;
+            if(artwork != null && needSmallIcon) {
+            	
+            	Resources res = context.getResources();
+            	
+            	float ratio = 0.0f;
+            	int width = artwork.getWidth();
+            	int height = artwork.getHeight();
+            	if(width >= height) {
+            		ratio = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width) / (float)width;
+            	} else {
+            		ratio = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height) / (float)height;
+            	}
+            	
+            	smallIcon = Bitmap.createScaledBitmap(artwork, (int)(width * ratio), (int)(height * ratio), false);
+            }
+            
+            return new MetaData(trackId, title, artist, album, artwork, smallIcon);
 
         } finally {
             if(trackCursor != null) {

@@ -128,7 +128,7 @@ public class MusicPlaybackService extends Service
                 currentTrackInfo = data;
                 onTrackChanged();
             }
-        }).execute();
+        }, true).execute();
     }
 
     @Override

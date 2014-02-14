@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.yohpapa.tools.AlbumSongIdRetriever;
+import com.yohpapa.tools.MetaDataRetriever;
 import com.yohpapa.tools.MusicPlaybackService;
 import com.yohpapa.tools.AlbumSongIdRetriever.AlbumSongsInfo;
 
@@ -43,20 +44,23 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	public static final String ACTION_SEEK = BASE_URI + "ACTION_SEEK";
 	public static final String PRM_SEEK_TIME = BASE_URI + "PRM_SEEK_TIME";
 	
-	private OverlayViewManager _viewManager = null;
+	private OverlayViewManager _overlayManager = null;
+	private NotificationViewManager _notificationManager = null;
 	
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		
-		_viewManager = new OverlayViewManager(this);
+		_overlayManager = new OverlayViewManager(this);
+		_notificationManager = new NotificationViewManager(this);
 	}
 	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		
-		_viewManager.hide();
+		_overlayManager.hide();
+		_notificationManager.hide();
 	}
 	
 	@Override
@@ -102,7 +106,7 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 				
 				if(needToPlay) {
 					playTrack();
-					_viewManager.show();
+					_overlayManager.show();
 				}
 			}
 		});
@@ -119,7 +123,7 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	
 	private void onActionStop(Intent intent) {
 		stopTrack();
-		_viewManager.hide();
+		_overlayManager.hide();
 	}
 	
 	private void onActionTrackUp(Intent intent) {
@@ -141,11 +145,17 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	
 	@Override
 	protected void onTrackChanged() {
-		_viewManager.setMetaInformation(getCurrentTrackInfo());
+		MetaDataRetriever.MetaData meta = getCurrentTrackInfo();
+		
+		_overlayManager.setMetaInformation(meta);
+		_notificationManager.updateMetaData(meta);
 	}
 	
 	@Override
 	protected void onPlayStateChanged(int playState) {
-		_viewManager.setPlayState(playState == PLAY_STATE_PLAYING);
+		boolean isPlaying = playState == PLAY_STATE_PLAYING;
+		
+		_overlayManager.setPlayState(isPlaying);
+		_notificationManager.updatePlayState(isPlaying);
 	}
 }
