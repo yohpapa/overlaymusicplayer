@@ -16,14 +16,14 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@color/overlay_open_background"
+    android:id="@+id/layout_open"
     android:orientation="horizontal"
     android:layout_gravity="right|center_vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <Button android:id="@+id/button_open"
-        android:background="@android:color/transparent"
+        android:background="@color/overlay_open_background"
         android:layout_width="@dimen/overlay_open_button_width"
         android:layout_height="@dimen/overlay_open_button_height" />
 

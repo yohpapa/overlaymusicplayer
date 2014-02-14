@@ -19,8 +19,10 @@ package com.yohpapa.overlaymusicplayer.service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -36,6 +38,8 @@ import com.yohpapa.tools.MetaDataRetriever;
  */
 public class OverlayViewManager {
 	
+	private static final long AUTO_HIDE_TIMEOUT_MS = 3000L;
+	
 	private Context _context = null;
 	
 	private View _panelView = null;
@@ -46,11 +50,13 @@ public class OverlayViewManager {
 	private WindowManager.LayoutParams _openParams = null;
 	
 	private WindowManager _windowManager = null;
+	
+	private Handler _timeoutHandler = null;
 
 	public OverlayViewManager(Context context) {
 		_context = context;
-		
 		_windowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+		_timeoutHandler = new Handler();
 		
 		_panelParams = new WindowManager.LayoutParams(
 				WindowManager.LayoutParams.WRAP_CONTENT,
@@ -95,6 +101,15 @@ public class OverlayViewManager {
 		
 		setupPlayPauseButton(_panelView, false);
 		
+		View layout = _panelView.findViewById(R.id.layout_panel);
+		layout.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				startTimeoutTimer();
+				return false;
+			}
+		});
+		
 		final int[] openButtonIds = new int[] {
 			R.id.button_open,
 		};
@@ -103,6 +118,23 @@ public class OverlayViewManager {
 		};
 		_openView = inflater.inflate(R.layout.overlay_open_button, null);
 		setupButtonListener(_openView, openButtonIds, openlListeners);
+
+		layout = _openView.findViewById(R.id.layout_open);
+		layout.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+
+				View view = _openView.findViewById(R.id.button_open);
+				int visiblity = view.getVisibility();
+				if(visiblity != View.VISIBLE) {
+					view.setVisibility(View.VISIBLE);
+				}
+				
+				startTimeoutTimer();
+				
+				return false;
+			}
+		});
 	}
 	
 	private void setupButtonListener(View parent, int[] ids, View.OnClickListener[] listeners) {
@@ -136,6 +168,8 @@ public class OverlayViewManager {
 				intent.setAction(OverlayMusicPlayerService.ACTION_PLAY);
 			}
 			_context.startService(intent);
+			
+			startTimeoutTimer();
 		}
 	};
 	
@@ -145,6 +179,8 @@ public class OverlayViewManager {
 			Intent intent = new Intent(_context, OverlayMusicPlayerService.class);
 			intent.setAction(OverlayMusicPlayerService.ACTION_TRACKDOWN);
 			_context.startService(intent);
+			
+			startTimeoutTimer();
 		}
 	};
 	
@@ -154,6 +190,8 @@ public class OverlayViewManager {
 			Intent intent = new Intent(_context, OverlayMusicPlayerService.class);
 			intent.setAction(OverlayMusicPlayerService.ACTION_TRACKUP);
 			_context.startService(intent);
+			
+			startTimeoutTimer();
 		}
 	};
 	
@@ -163,13 +201,15 @@ public class OverlayViewManager {
 			Intent intent = new Intent(_context, OverlayMusicPlayerService.class);
 			intent.setAction(OverlayMusicPlayerService.ACTION_STOP);
 			_context.startService(intent);
+			
+			startTimeoutTimer();
 		}
 	};
 	
 	private final View.OnClickListener _onHideClickListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			showView(_openView, _openParams);
+			showView(_openView, _openParams, true);
 		}
 	};
 	
@@ -180,22 +220,22 @@ public class OverlayViewManager {
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			_context.startActivity(intent);
 			
-			showView(_openView, _openParams);
+			showView(_openView, _openParams, true);
 		}
 	};
 	
 	private final View.OnClickListener _onOpenClickListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			showView(_panelView, _openParams);
+			showView(_panelView, _panelParams, true);
 		}
 	};
 
 	public void show() {
-		showView(_panelView, _openParams);
+		showView(_panelView, _panelParams, true);
 	}
 	
-	private void showView(View view, WindowManager.LayoutParams params) {
+	private void showView(View view, WindowManager.LayoutParams params, boolean startTimer) {
 		if(_frontView == view) {
 			return;
 		}
@@ -203,6 +243,10 @@ public class OverlayViewManager {
 		hide();
 		_windowManager.addView(view, params);
 		_frontView = view;
+		
+		if(startTimer) {
+			startTimeoutTimer();
+		}
 	}
 
 	public void hide() {
@@ -212,6 +256,8 @@ public class OverlayViewManager {
 		
 		_windowManager.removeView(_frontView);
 		_frontView = null;
+		
+		stopTimeoutTimer();
 	}
 	
 	public void setMetaInformation(MetaDataRetriever.MetaData meta) {
@@ -236,5 +282,24 @@ public class OverlayViewManager {
 	
 	public void setPlayState(boolean isPlaying) {
 		setupPlayPauseButton(_panelView, isPlaying);
+	}
+	
+	private void startTimeoutTimer() {
+		stopTimeoutTimer();
+		_timeoutHandler.postDelayed(_onTimerExpired, AUTO_HIDE_TIMEOUT_MS);
+	}
+	
+	private final Runnable _onTimerExpired = new Runnable() {
+		@Override
+		public void run() {
+			showView(_openView, _openParams, false);
+			
+			View view = _openView.findViewById(R.id.button_open);
+			view.setVisibility(View.INVISIBLE);
+		}
+	};
+	
+	private void stopTimeoutTimer() {
+		_timeoutHandler.removeCallbacks(_onTimerExpired);
 	}
 }
