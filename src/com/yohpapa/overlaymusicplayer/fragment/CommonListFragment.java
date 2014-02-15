@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2014 Kensuke Nakai<kemumaki.kemuo@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -80,6 +80,10 @@ public abstract class CommonListFragment extends ListFragment implements LoaderC
 				onClickItem(view);
 			}
 		});
+	}
+	
+	protected void resumeListPosition() {
+		ListView list = getListView();
 		list.setSelectionFromTop(_lastPosition, 0);
 	}
 	

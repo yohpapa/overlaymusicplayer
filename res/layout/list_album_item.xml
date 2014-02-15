@@ -38,16 +38,16 @@
         android:layout_height="wrap_content">
         
         <TextView android:id="@+id/text_title"
-            android:textSize="@dimen/list_album_font_size"
-            android:textColor="@color/list_album_font"
+            android:textSize="@dimen/list_font_size"
+            android:textColor="@color/list_font"
             android:singleLine="true"
             android:ellipsize="end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         
         <TextView android:id="@+id/text_artist"
-            android:textSize="@dimen/list_artist_font_size"
-            android:textColor="@color/list_artist_font"
+            android:textSize="@dimen/list_sub_font_size"
+            android:textColor="@color/list_sub_font"
             android:singleLine="true"
             android:ellipsize="end"
             android:layout_width="match_parent"

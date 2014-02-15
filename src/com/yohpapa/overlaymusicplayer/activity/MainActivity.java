@@ -26,6 +26,7 @@ import android.util.Log;
 
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.fragment.AlbumListFragment;
+import com.yohpapa.overlaymusicplayer.fragment.ArtistListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.GenreListFragment;
 import com.yohpapa.tools.PrefUtils;
 
@@ -33,7 +34,7 @@ public class MainActivity extends Activity {
 
 	private Fragment[] fragments = new Fragment[] {
 		GenreListFragment.getInstance(),
-		AlbumListFragment.getInstance(),
+		ArtistListFragment.getInstance(),
 		AlbumListFragment.getInstance(),
 		AlbumListFragment.getInstance(),
 		AlbumListFragment.getInstance(),

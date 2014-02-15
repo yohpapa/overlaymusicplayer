@@ -21,8 +21,8 @@
     <color name="overlay_panel_background">#ffffff</color>
     <color name="overlay_open_background">#77ffffff</color>
     
-    <color name="list_album_font">#ffffff</color>
-    <color name="list_artist_font">#cccccc</color>
+    <color name="list_font">#ffffff</color>
+    <color name="list_sub_font">#cccccc</color>
     <color name="list_button_pressed">#7f7f7f</color>
     <color name="list_button_normal">#00000000</color>
     

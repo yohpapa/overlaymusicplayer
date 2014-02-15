@@ -16,37 +16,46 @@
 
 package com.yohpapa.overlaymusicplayer.fragment;
 
+import com.yohpapa.overlaymusicplayer.R;
+import com.yohpapa.overlaymusicplayer.adapter.ArtistListAdapter;
+import com.yohpapa.overlaymusicplayer.service.OverlayMusicPlayerService;
+
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ListAdapter;
-
-import com.yohpapa.overlaymusicplayer.R;
-import com.yohpapa.overlaymusicplayer.adapter.GenreListAdapter;
-import com.yohpapa.overlaymusicplayer.service.OverlayMusicPlayerService;
-import com.yohpapa.tools.task.GenreCursorLoader;
 
 /**
  * @author YohPapa
  */
-public class GenreListFragment extends CommonListFragment {
-
-	public static GenreListFragment getInstance() {
-		return new GenreListFragment();
-	}
+public class ArtistListFragment extends CommonListFragment {
 	
+	public static ArtistListFragment getInstance() {
+		return new ArtistListFragment();
+	}
+
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		return new GenreCursorLoader(getActivity());
+		return new CursorLoader(
+					getActivity(),
+					MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+					new String[] {
+						MediaStore.Audio.Artists._ID,
+						MediaStore.Audio.Artists.ARTIST,
+						MediaStore.Audio.Artists.NUMBER_OF_TRACKS,
+					},
+					null, null, MediaStore.Audio.Artists.ARTIST + " ASC");
 	}
-	
+
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		super.onLoadFinished(loader, cursor);
 		
-		ListAdapter adapter = new GenreListAdapter(getActivity(), cursor, new View.OnClickListener() {
+		ListAdapter adapter = new ArtistListAdapter(getActivity(), cursor, new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				onClickItem(view);
@@ -59,13 +68,16 @@ public class GenreListFragment extends CommonListFragment {
 	
 	@Override
 	protected void onClickItem(View view) {
-		long genreId = (Long)view.getTag(R.id.tag_genre_id);
-		String genreName = (String)view.getTag(R.id.tag_genre_name);
+		Long artistId = (Long)view.getTag(R.id.tag_artist_id);
+		String artistName = (String)view.getTag(R.id.tag_artist_name);
+		if(artistId == null) {
+			return;
+		}
 		
 		Intent intent = new Intent(getActivity(), OverlayMusicPlayerService.class);
-		intent.setAction(OverlayMusicPlayerService.ACTION_SELECT_GENRE);
-		intent.putExtra(OverlayMusicPlayerService.PRM_GENRE_ID, genreId);
-		intent.putExtra(OverlayMusicPlayerService.PRM_GENRE_NAME, genreName);
+		intent.setAction(OverlayMusicPlayerService.ACTION_SELECT_ARTIST);
+		intent.putExtra(OverlayMusicPlayerService.PRM_ARTIST_ID, artistId);
+		intent.putExtra(OverlayMusicPlayerService.PRM_ARTIST_NAME, artistName);
 		intent.putExtra(OverlayMusicPlayerService.PRM_NEED_TO_PLAY_AFTER_SELECT, true);
 		getActivity().startService(intent);
 	}

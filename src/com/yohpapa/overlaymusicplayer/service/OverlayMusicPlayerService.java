@@ -23,6 +23,7 @@ import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.tools.MusicPlaybackService;
 import com.yohpapa.tools.ToastUtils;
 import com.yohpapa.tools.task.AlbumSongIdRetriever;
+import com.yohpapa.tools.task.ArtistSongIdRetriever;
 import com.yohpapa.tools.task.GenreSongIdRetriever;
 import com.yohpapa.tools.task.MetaDataRetriever;
 import com.yohpapa.tools.task.OnFinishRetrievingInfo;
@@ -34,7 +35,7 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	private static final String BASE_URI = OverlayMusicPlayerService.class.getName() + ".";
 	
 	public static final String ACTION_SELECT_ALBUM = BASE_URI + "ACTION_SELECT_ALBUM";
-	// TODO: SELECT_ARTIST, SELECT_PLAYLIST, SELECT_SONG
+	// TODO: SELECT_PLAYLIST, SELECT_SONG
 	public static final String PRM_ALBUM_ID = BASE_URI + "PRM_ALBUM_ID";
 	public static final String PRM_ALBUM_NAME = BASE_URI + "PRM_ALBUM_NAME";
 	public static final String PRM_NEED_TO_PLAY_AFTER_SELECT = BASE_URI + "PRM_NEED_TO_PLAY_AFTER_SELECT";
@@ -42,6 +43,10 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	public static final String ACTION_SELECT_GENRE = BASE_URI + "ACTION_SELECT_GENRE";
 	public static final String PRM_GENRE_ID = BASE_URI + "PRM_GENRE_ID";
 	public static final String PRM_GENRE_NAME = BASE_URI + "PRM_GENRE_NAME";
+	
+	public static final String ACTION_SELECT_ARTIST = BASE_URI + "ACTION_SELECT_ARTIST";
+	public static final String PRM_ARTIST_ID = BASE_URI + "PRM_ARTIST_ID";
+	public static final String PRM_ARTIST_NAME = BASE_URI + "PRM_ARTIST_NAME";
 
 	public static final String ACTION_PLAY = BASE_URI + "ACTION_PLAY";
 	public static final String ACTION_PAUSE = BASE_URI + "ACTION_PAUSE";
@@ -80,6 +85,8 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		String action = intent.getAction();
 		if(ACTION_SELECT_GENRE.equals(action)) {
 			onActionSelectGenre(intent);
+		} else if(ACTION_SELECT_ARTIST.equals(action)) {
+			onActionSelectArtist(intent);
 		} else if(ACTION_SELECT_ALBUM.equals(action)) {
 			onActionSelectAlbum(intent);
 		} else if(ACTION_PLAY.equals(action)) {
@@ -112,17 +119,38 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		GenreSongIdRetriever task = new GenreSongIdRetriever(this, genreId, genreName, new OnFinishRetrievingInfo() {
 			@Override
 			public void onFinishRetrieving(SongIdList list) {
-				if(list == null) {
-					ToastUtils.show(OverlayMusicPlayerService.this, R.string.msg_no_song);
-					return;
-				}
-				
-				selectTrack(0, list.songIds);
-				
-				if(needToPlay) {
-					playTrack();
-					_overlayManager.show();
-				}
+				onRetrievedSongIdList(list, needToPlay);
+			}
+		});
+		task.execute();
+	}
+	
+	private void onRetrievedSongIdList(SongIdList list, boolean needToPlay) {
+		if(list == null) {
+			ToastUtils.show(OverlayMusicPlayerService.this, R.string.msg_no_song);
+			return;
+		}
+		
+		selectTrack(0, list.songIds);
+		
+		if(needToPlay) {
+			playTrack();
+			_overlayManager.show();
+		}
+	}
+	
+	private void onActionSelectArtist(Intent intent) {
+		long artistId = intent.getLongExtra(PRM_ARTIST_ID, -1L);
+		String artistName = intent.getStringExtra(PRM_ARTIST_NAME);
+		if(artistId == -1L) {
+			return;
+		}
+		final boolean needToPlay = intent.getBooleanExtra(PRM_NEED_TO_PLAY_AFTER_SELECT, false);
+		
+		ArtistSongIdRetriever task = new ArtistSongIdRetriever(this, artistId, artistName, new OnFinishRetrievingInfo() {
+			@Override
+			public void onFinishRetrieving(SongIdList list) {
+				onRetrievedSongIdList(list, needToPlay);
 			}
 		});
 		task.execute();
@@ -139,12 +167,7 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		AlbumSongIdRetriever task = new AlbumSongIdRetriever(this, albumId, albumName, new OnFinishRetrievingInfo() {
 			@Override
 			public void onFinishRetrieving(SongIdList list) {
-				selectTrack(0, list.songIds);
-				
-				if(needToPlay) {
-					playTrack();
-					_overlayManager.show();
-				}
+				onRetrievedSongIdList(list, needToPlay);
 			}
 		});
 		task.execute();

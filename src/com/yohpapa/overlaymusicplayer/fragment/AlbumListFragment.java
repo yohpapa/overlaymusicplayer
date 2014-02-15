@@ -79,6 +79,8 @@ public class AlbumListFragment extends CommonListFragment {
 			}
 		}, _artworkCache);
 		setListAdapter(adapter);
+		
+		resumeListPosition();
 	}
 	
 	@Override
