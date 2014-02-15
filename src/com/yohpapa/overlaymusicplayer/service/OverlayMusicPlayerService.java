@@ -27,6 +27,7 @@ import com.yohpapa.tools.task.ArtistSongIdRetriever;
 import com.yohpapa.tools.task.GenreSongIdRetriever;
 import com.yohpapa.tools.task.MetaDataRetriever;
 import com.yohpapa.tools.task.OnFinishRetrievingInfo;
+import com.yohpapa.tools.task.PlaylistSongIdRetriever;
 import com.yohpapa.tools.task.SongIdList;
 
 public class OverlayMusicPlayerService extends MusicPlaybackService {
@@ -35,7 +36,7 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	private static final String BASE_URI = OverlayMusicPlayerService.class.getName() + ".";
 	
 	public static final String ACTION_SELECT_ALBUM = BASE_URI + "ACTION_SELECT_ALBUM";
-	// TODO: SELECT_PLAYLIST, SELECT_SONG
+	// TODO: SELECT_SONG
 	public static final String PRM_ALBUM_ID = BASE_URI + "PRM_ALBUM_ID";
 	public static final String PRM_ALBUM_NAME = BASE_URI + "PRM_ALBUM_NAME";
 	public static final String PRM_NEED_TO_PLAY_AFTER_SELECT = BASE_URI + "PRM_NEED_TO_PLAY_AFTER_SELECT";
@@ -47,6 +48,10 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	public static final String ACTION_SELECT_ARTIST = BASE_URI + "ACTION_SELECT_ARTIST";
 	public static final String PRM_ARTIST_ID = BASE_URI + "PRM_ARTIST_ID";
 	public static final String PRM_ARTIST_NAME = BASE_URI + "PRM_ARTIST_NAME";
+	
+	public static final String ACTION_SELECT_PLAYLIST = BASE_URI + "ACTION_SELECT_PLAYLIST";
+	public static final String PRM_PLAYLIST_ID = BASE_URI + "PRM_PLAYLIST_ID";
+	public static final String PRM_PLAYLIST_NAME = BASE_URI + "PRM_PLAYLIST_NAME";
 
 	public static final String ACTION_PLAY = BASE_URI + "ACTION_PLAY";
 	public static final String ACTION_PAUSE = BASE_URI + "ACTION_PAUSE";
@@ -89,6 +94,8 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 			onActionSelectArtist(intent);
 		} else if(ACTION_SELECT_ALBUM.equals(action)) {
 			onActionSelectAlbum(intent);
+		} else if(ACTION_SELECT_PLAYLIST.equals(action)) {
+			onActionSelectPlaylist(intent);
 		} else if(ACTION_PLAY.equals(action)) {
 			onActionPlay(intent);
 		} else if(ACTION_PAUSE.equals(action)) {
@@ -165,6 +172,23 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		final boolean needToPlay = intent.getBooleanExtra(PRM_NEED_TO_PLAY_AFTER_SELECT, false);
 		
 		AlbumSongIdRetriever task = new AlbumSongIdRetriever(this, albumId, albumName, new OnFinishRetrievingInfo() {
+			@Override
+			public void onFinishRetrieving(SongIdList list) {
+				onRetrievedSongIdList(list, needToPlay);
+			}
+		});
+		task.execute();
+	}
+	
+	private void onActionSelectPlaylist(Intent intent) {
+		long playlistId = intent.getLongExtra(PRM_PLAYLIST_ID, -1L);
+		String playlistName = intent.getStringExtra(PRM_PLAYLIST_NAME);
+		if(playlistId == -1L) {
+			return;
+		}
+		final boolean needToPlay = intent.getBooleanExtra(PRM_NEED_TO_PLAY_AFTER_SELECT, false);
+		
+		PlaylistSongIdRetriever task = new PlaylistSongIdRetriever(this, playlistId, playlistName, new OnFinishRetrievingInfo() {
 			@Override
 			public void onFinishRetrieving(SongIdList list) {
 				onRetrievedSongIdList(list, needToPlay);

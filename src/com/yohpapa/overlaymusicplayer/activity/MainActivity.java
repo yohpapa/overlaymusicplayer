@@ -28,6 +28,7 @@ import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.fragment.AlbumListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.ArtistListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.GenreListFragment;
+import com.yohpapa.overlaymusicplayer.fragment.PlayListFragment;
 import com.yohpapa.tools.PrefUtils;
 
 public class MainActivity extends Activity {
@@ -36,7 +37,7 @@ public class MainActivity extends Activity {
 		GenreListFragment.getInstance(),
 		ArtistListFragment.getInstance(),
 		AlbumListFragment.getInstance(),
-		AlbumListFragment.getInstance(),
+		PlayListFragment.getInstance(),
 		AlbumListFragment.getInstance(),
 	};
 	private final int[] fragmentNames = {
