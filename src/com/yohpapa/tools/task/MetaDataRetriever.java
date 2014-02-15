@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools;
+package com.yohpapa.tools.task;
+
+import com.yohpapa.tools.CursorHelper;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;

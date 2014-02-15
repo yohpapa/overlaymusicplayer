@@ -16,8 +16,6 @@
 
 package com.yohpapa.overlaymusicplayer.fragment;
 
-import android.app.ListFragment;
-import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -27,15 +25,13 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.LruCache;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.adapter.AlbumListAdapter;
 import com.yohpapa.overlaymusicplayer.service.OverlayMusicPlayerService;
 
-public class AlbumListFragment extends ListFragment implements LoaderCallbacks<Cursor> {
+public class AlbumListFragment extends CommonListFragment {
 
 	public static AlbumListFragment getInstance() {
 		return new AlbumListFragment();
@@ -43,17 +39,11 @@ public class AlbumListFragment extends ListFragment implements LoaderCallbacks<C
 	
     // Use 1/8th of the available memory for this memory cache.
     private final int ARTWORK_CACHE_SIZE = (int)(Runtime.getRuntime().maxMemory() / 1024) / 8;
-	
 	private LruCache<Long, Bitmap> _artworkCache = null;
-	private int _lastPosition = 0;
 	
 	@Override
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
-		
-		if(savedState != null) {
-			_lastPosition = savedState.getInt("_lastPosition");
-		}
 		
 		_artworkCache = new LruCache<Long, Bitmap>(ARTWORK_CACHE_SIZE) {
 	        @Override
@@ -63,41 +53,6 @@ public class AlbumListFragment extends ListFragment implements LoaderCallbacks<C
 	    };
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		getLoaderManager().initLoader(0, null, this);
-	}
-	
-	@Override
-	public void onPause() {
-		super.onPause();
-	}
-	
-	@Override
-	public void onActivityCreated(Bundle savedState) {
-		super.onActivityCreated(savedState);
-		
-		if(savedState != null) {
-			_lastPosition = savedState.getInt("_lastPosition");
-		}
-	}
-	
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		
-		ListView list = getListView();
-		if(list == null) {
-			return;
-		}
-		
-		_lastPosition = list.getFirstVisiblePosition();
-		if(outState != null) {
-			outState.putInt("_lastPosition", _lastPosition);
-		}
-	}
-	
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		return new CursorLoader(
@@ -115,29 +70,19 @@ public class AlbumListFragment extends ListFragment implements LoaderCallbacks<C
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+		super.onLoadFinished(loader, cursor);
+		
 		ListAdapter adapter = new AlbumListAdapter(getActivity(), cursor, new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				onClickAlbum(view);
+				onClickItem(view);
 			}
 		}, _artworkCache);
 		setListAdapter(adapter);
-		
-		ListView list = getListView();
-		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				onClickAlbum(view);
-			}
-		});
-		list.setSelectionFromTop(_lastPosition, 0);
-	}
-
-	@Override
-	public void onLoaderReset(Loader<Cursor> loader) {
 	}
 	
-	private void onClickAlbum(View view) {
+	@Override
+	protected void onClickItem(View view) {
 		long albumId = (Long)view.getTag(R.id.tag_album_id);
 		String albumName = (String)view.getTag(R.id.tag_album_name);
 		

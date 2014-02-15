@@ -18,4 +18,14 @@
 <resources>
     <string name="app_name">Overlay Music Player</string>
     <string name="desc_image_artwork"></string>
+    
+    <string name="msg_no_song">No song to play&#8230;</string>
+    
+    <string name="tab_genres">GENRES</string>
+    <string name="tab_artists">ARTISTS</string>
+    <string name="tab_albums">ALBUMS</string>
+    <string name="tab_playlists">PLAYLISTS</string>
+    <string name="tab_songs">SONGS</string>
+    
+    <string name="pref_last_tab_position">pref_last_tab_position</string>
 </resources>

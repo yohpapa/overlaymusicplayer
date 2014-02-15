@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools;
+package com.yohpapa.tools.task;
+
+import com.yohpapa.tools.CursorHelper;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,28 +28,20 @@ import android.provider.MediaStore;
  * @author YohPapa
  *
  */
-public class AlbumSongIdRetriever extends AsyncTask<Void, Void, AlbumSongIdRetriever.AlbumSongsInfo> {
+public class AlbumSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 
-	public class AlbumSongsInfo {
-		public long[] songIds;
-	}
-	
-	public interface OnFinishRetrievingInfo {
-		void onFinishRetrieving(AlbumSongsInfo info);
-	}
-	
 	private final long _albumId;
 	private final Context _context;
 	private final OnFinishRetrievingInfo _onFinish;
 	
-	public AlbumSongIdRetriever(Context context, long albumId, OnFinishRetrievingInfo onFinish) {
+	public AlbumSongIdRetriever(Context context, long albumId, String albumName, OnFinishRetrievingInfo onFinish) {
 		_context = context;
 		_albumId = albumId;
 		_onFinish = onFinish;
 	}
 	
 	@Override
-	protected AlbumSongsInfo doInBackground(Void... params) {
+	protected SongIdList doInBackground(Void... params) {
 		
 		ContentResolver resolver = _context.getContentResolver();
 		Cursor cursor = null;
@@ -71,10 +65,7 @@ public class AlbumSongIdRetriever extends AsyncTask<Void, Void, AlbumSongIdRetri
 	        	songIds[index ++] = CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID);
 	        } while(cursor.moveToNext());
 	        
-	        AlbumSongsInfo info = new AlbumSongsInfo();
-	        info.songIds = songIds;
-	        
-			return info;
+			return new SongIdList(songIds);
 			
 		} finally {
 			if(cursor != null) {
@@ -84,7 +75,7 @@ public class AlbumSongIdRetriever extends AsyncTask<Void, Void, AlbumSongIdRetri
 	}
 
 	@Override
-	protected void onPostExecute(AlbumSongsInfo result) {
+	protected void onPostExecute(SongIdList result) {
 		if(_onFinish != null) {
 			_onFinish.onFinishRetrieving(result);
 		}

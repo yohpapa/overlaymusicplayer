@@ -31,7 +31,7 @@ import android.widget.TextView;
 
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.activity.MainActivity;
-import com.yohpapa.tools.MetaDataRetriever;
+import com.yohpapa.tools.task.MetaDataRetriever;
 
 /**
  * @author YohPapa

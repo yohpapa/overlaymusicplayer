@@ -16,11 +16,14 @@
 
 package com.yohpapa.overlaymusicplayer.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.yohpapa.overlaymusicplayer.R;
-import com.yohpapa.tools.MetaDataRetriever;
+import com.yohpapa.overlaymusicplayer.activity.MainActivity;
+import com.yohpapa.tools.task.MetaDataRetriever;
 
 /**
  * @author YohPapa
@@ -33,6 +36,11 @@ public class NotificationViewManager {
 	public NotificationViewManager(Service service) {
 		_service = service;
 		_builder = new NotificationCompat.Builder(_service);
+		
+		Intent intent = new Intent(_service, MainActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		PendingIntent pending = PendingIntent.getActivity(_service, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		_builder.setContentIntent(pending);
 	}
 	
 	public void updateMetaData(MetaDataRetriever.MetaData meta) {

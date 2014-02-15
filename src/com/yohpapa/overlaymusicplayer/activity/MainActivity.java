@@ -17,31 +17,79 @@
 package com.yohpapa.overlaymusicplayer.activity;
 
 import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.fragment.AlbumListFragment;
+import com.yohpapa.overlaymusicplayer.fragment.GenreListFragment;
+import com.yohpapa.tools.PrefUtils;
 
 public class MainActivity extends Activity {
 
+	private Fragment[] fragments = new Fragment[] {
+		GenreListFragment.getInstance(),
+		AlbumListFragment.getInstance(),
+		AlbumListFragment.getInstance(),
+		AlbumListFragment.getInstance(),
+		AlbumListFragment.getInstance(),
+	};
+	private final int[] fragmentNames = {
+		R.string.tab_genres,
+		R.string.tab_artists,
+		R.string.tab_albums,
+		R.string.tab_playlists,
+		R.string.tab_songs,
+	};
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		setupActionBar();
+	}
+	
+	private void setupActionBar() {
 		ActionBar bar = getActionBar();
-		bar.hide();
+		bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		bar.setDisplayShowHomeEnabled(false);
+		bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
 		
-		if(savedInstanceState != null) {
-			return;
+		int lastPosition = PrefUtils.getInt(this, R.string.pref_last_tab_position, 0);
+		
+		for(int i = 0; i < fragmentNames.length; i ++) {
+			
+			final Fragment fragment = fragments[i];
+			
+			ActionBar.Tab tab = bar.newTab();
+			tab.setText(fragmentNames[i]);
+			tab.setTabListener(new ActionBar.TabListener() {
+				@Override
+				public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+					Log.d("DEBUG", "onTabUnselected");
+				}
+				
+				@Override
+				public void onTabSelected(Tab tab, FragmentTransaction ft) {
+					ft.replace(R.id.fragment_list, fragment);
+					PrefUtils.setInt(MainActivity.this, R.string.pref_last_tab_position, tab.getPosition());
+				}
+				
+				@Override
+				public void onTabReselected(Tab tab, FragmentTransaction ft) {
+					Log.d("DEBUG", "onTabReselected");
+				}
+			});
+			boolean isSelected = false;
+			if(i == lastPosition) {
+				isSelected = true;
+			}
+			bar.addTab(tab, isSelected);
 		}
-		
-		Fragment fragment = AlbumListFragment.getInstance();
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		transaction.replace(R.id.fragment_list, fragment);
-		transaction.commit();
 	}
 }
