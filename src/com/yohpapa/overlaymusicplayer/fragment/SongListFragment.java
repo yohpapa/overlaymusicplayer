@@ -26,35 +26,39 @@ import android.view.View;
 import android.widget.ListAdapter;
 
 import com.yohpapa.overlaymusicplayer.R;
-import com.yohpapa.overlaymusicplayer.adapter.AlbumListAdapter;
+import com.yohpapa.overlaymusicplayer.adapter.SongListAdapter;
 import com.yohpapa.overlaymusicplayer.service.OverlayMusicPlayerService;
 
-public class AlbumListFragment extends ArtworkCacheListFragment {
-
-	public static AlbumListFragment getInstance() {
-		return new AlbumListFragment();
+/**
+ * @author YohPapa
+ *
+ */
+public class SongListFragment extends ArtworkCacheListFragment {
+	
+	public static SongListFragment getInstance() {
+		return new SongListFragment();
 	}
 	
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		return new CursorLoader(
-				getActivity(),
-				MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                new String[] {
-                    MediaStore.Audio.Albums._ID,
-                    MediaStore.Audio.Albums.ALBUM,
-                    MediaStore.Audio.Albums.NUMBER_OF_SONGS,
-                    MediaStore.Audio.Albums.ARTIST,
-                    MediaStore.Audio.Albums.ALBUM_ART,
-                },
-                null, null, MediaStore.Audio.Albums.ALBUM + " ASC");
+					getActivity(),
+					MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+					new String[] {
+						MediaStore.Audio.Media._ID,
+						MediaStore.Audio.Media.TITLE,
+						MediaStore.Audio.Media.ARTIST,
+						MediaStore.Audio.Media.ALBUM_ID,
+					},
+					MediaStore.Audio.Media.IS_MUSIC + "!=0", null,
+					MediaStore.Audio.Media.TITLE + " ASC");
 	}
 
 	@Override
-	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+	public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor cursor) {
 		super.onLoadFinished(loader, cursor);
 		
-		ListAdapter adapter = new AlbumListAdapter(getActivity(), cursor, new View.OnClickListener() {
+		ListAdapter adapter = new SongListAdapter(getActivity(), cursor, new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				onClickItem(view);
@@ -67,13 +71,14 @@ public class AlbumListFragment extends ArtworkCacheListFragment {
 	
 	@Override
 	protected void onClickItem(View view) {
-		long albumId = (Long)view.getTag(R.id.tag_album_id);
-		String albumName = (String)view.getTag(R.id.tag_album_name);
+		Long songId = (Long)view.getTag(R.id.tag_song_id);
+		if(songId == null) {
+			return;
+		}
 		
 		Intent intent = new Intent(getActivity(), OverlayMusicPlayerService.class);
-		intent.setAction(OverlayMusicPlayerService.ACTION_SELECT_ALBUM);
-		intent.putExtra(OverlayMusicPlayerService.PRM_ALBUM_ID, albumId);
-		intent.putExtra(OverlayMusicPlayerService.PRM_ALBUM_NAME, albumName);
+		intent.setAction(OverlayMusicPlayerService.ACTION_SELECT_SONG);
+		intent.putExtra(OverlayMusicPlayerService.PRM_SONG_ID, songId);
 		intent.putExtra(OverlayMusicPlayerService.PRM_NEED_TO_PLAY_AFTER_SELECT, true);
 		getActivity().startService(intent);
 	}

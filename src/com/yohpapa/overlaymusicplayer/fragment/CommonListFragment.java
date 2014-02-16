@@ -48,6 +48,22 @@ public abstract class CommonListFragment extends ListFragment implements LoaderC
 	}
 	
 	@Override
+	public void onPause() {
+		super.onPause();
+		
+		_lastPosition = getListLastPosition();
+	}
+	
+	private int getListLastPosition() {
+		ListView list = getListView();
+		if(list == null) {
+			return 0;
+		}
+		
+		return list.getFirstVisiblePosition();
+	}
+	
+	@Override
 	public void onActivityCreated(Bundle savedState) {
 		super.onActivityCreated(savedState);
 		
@@ -60,12 +76,7 @@ public abstract class CommonListFragment extends ListFragment implements LoaderC
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		
-		ListView list = getListView();
-		if(list == null) {
-			return;
-		}
-		
-		_lastPosition = list.getFirstVisiblePosition();
+		_lastPosition = getListLastPosition();
 		if(outState != null) {
 			outState.putInt("_lastPosition", _lastPosition);
 		}

@@ -32,8 +32,12 @@ import com.yohpapa.tools.CursorHelper;
 import com.yohpapa.tools.task.ArtworkCache;
 import com.yohpapa.tools.task.ArtworkTask;
 
-public class AlbumListAdapter extends CursorAdapter {
-	
+/**
+ * @author YohPapa
+ *
+ */
+public class SongListAdapter extends CursorAdapter {
+
 	private LayoutInflater _inflater = null;
 	private View.OnClickListener _listener = null;
 	private ArtworkCache _artworkCache = null;
@@ -43,26 +47,27 @@ public class AlbumListAdapter extends CursorAdapter {
 		public TextView title;
 		public TextView artist;
 	}
-
-	public AlbumListAdapter(Context context, Cursor cursor, View.OnClickListener listener, ArtworkCache cache) {
+	
+	public SongListAdapter(Context context, Cursor cursor, View.OnClickListener listener, ArtworkCache cache) {
 		super(context, cursor, true);
 		
 		_inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		_listener = listener;
-		_artworkCache = cache;
+		_artworkCache =  cache;
 	}
 
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
-		
-		long albumId = CursorHelper.getLong(cursor, MediaStore.Audio.Albums._ID);
-		String albumName = CursorHelper.getString(cursor, MediaStore.Audio.Albums.ALBUM);
-		String artistName = CursorHelper.getString(cursor, MediaStore.Audio.Albums.ARTIST);
-		
 		ViewHolder holder = (ViewHolder)view.getTag();
-		holder.title.setText(albumName);
+		
+		long songId = CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID);
+		long albumId = CursorHelper.getLong(cursor, MediaStore.Audio.Media.ALBUM_ID);
+		String title = CursorHelper.getString(cursor, MediaStore.Audio.Media.TITLE);
+		String artistName = CursorHelper.getString(cursor, MediaStore.Audio.Media.ARTIST);
+		
+		holder.title.setText(title);
 		holder.artist.setText(artistName);
-
+		
 		Bitmap artwork = _artworkCache.get(albumId);
 		if(artwork != null) {
 			holder.artwork.setImageBitmap(artwork);
@@ -70,8 +75,7 @@ public class AlbumListAdapter extends CursorAdapter {
 			new ArtworkTask(context, albumId, holder.artwork, _artworkCache).execute();
 		}
 		
-		view.setTag(R.id.tag_album_id, albumId);
-		view.setTag(R.id.tag_album_name, albumName);
+		view.setTag(R.id.tag_song_id, songId);
 		holder.artwork.setTag(R.id.tag_album_id, albumId);
 		
 		view.setOnClickListener(_listener);
@@ -79,7 +83,7 @@ public class AlbumListAdapter extends CursorAdapter {
 
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
-		View layout = _inflater.inflate(R.layout.list_album_item, null);
+		View layout = _inflater.inflate(R.layout.list_song_item, null);
 		
 		ViewHolder holder = new ViewHolder();
 		holder.artwork = (ImageView)layout.findViewById(R.id.image_artwork);

@@ -29,6 +29,7 @@ import com.yohpapa.overlaymusicplayer.fragment.AlbumListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.ArtistListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.GenreListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.PlayListFragment;
+import com.yohpapa.overlaymusicplayer.fragment.SongListFragment;
 import com.yohpapa.tools.PrefUtils;
 
 public class MainActivity extends Activity {
@@ -38,7 +39,7 @@ public class MainActivity extends Activity {
 		ArtistListFragment.getInstance(),
 		AlbumListFragment.getInstance(),
 		PlayListFragment.getInstance(),
-		AlbumListFragment.getInstance(),
+		SongListFragment.getInstance(),
 	};
 	private final int[] fragmentNames = {
 		R.string.tab_genres,
