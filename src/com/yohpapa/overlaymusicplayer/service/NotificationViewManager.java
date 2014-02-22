@@ -23,7 +23,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.activity.MainActivity;
-import com.yohpapa.tools.task.MetaDataRetriever;
+import com.yohpapa.tools.MetaDataRetriever;
 
 /**
  * @author YohPapa

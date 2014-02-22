@@ -25,8 +25,8 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.yohpapa.overlaymusicplayer.R;
+import com.yohpapa.overlaymusicplayer.fragment.loader.GenreCursorLoader;
 import com.yohpapa.tools.CursorHelper;
-import com.yohpapa.tools.task.GenreCursorLoader;
 
 public class GenreListAdapter extends CursorAdapter {
 

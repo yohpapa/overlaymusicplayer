@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools.task;
+package com.yohpapa.overlaymusicplayer.service.task;
 
 import com.yohpapa.tools.CursorHelper;
 
@@ -24,20 +24,23 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 
-public class PlaylistSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
+/**
+ * @author YohPapa
+ */
+public class ArtistSongInfoRetriever extends AsyncTask<Void, Void, SongInfoList> {
 
 	private Context _context = null;
-	private long _playlistId = -1L;
+	private long _artistId = -1L;
 	private OnFinishRetrievingInfo _listener = null;
 	
-	public PlaylistSongIdRetriever(Context context, long playlistId, String playlistName, OnFinishRetrievingInfo listener) {
+	public ArtistSongInfoRetriever(Context context, long artistId, String artistName, OnFinishRetrievingInfo listener) {
 		_context = context;
-		_playlistId = playlistId;
+		_artistId = artistId;
 		_listener = listener;
 	}
 	
 	@Override
-	protected SongIdList doInBackground(Void... args) {
+	protected SongInfoList doInBackground(Void... args) {
 		ContentResolver resolver = _context.getContentResolver();
 		if(resolver == null) {
 			return null;
@@ -46,33 +49,38 @@ public class PlaylistSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 		Cursor cursor = null;
 		try {
 			cursor = resolver.query(
-						MediaStore.Audio.Playlists.Members.getContentUri("external", _playlistId),
+						MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 						new String[] {
-							MediaStore.Audio.Playlists.Members.AUDIO_ID,
+							MediaStore.Audio.Media._ID,
+							MediaStore.Audio.Media.TITLE,
 						},
-						null, null, MediaStore.Audio.Playlists.Members.PLAY_ORDER + " ASC");
+						MediaStore.Audio.Media.ARTIST_ID + "=?", new String[] {String.valueOf(_artistId)},
+						MediaStore.Audio.Media.ARTIST + " ASC, "	+
+						MediaStore.Audio.Media.ALBUM + " ASC, "	+
+						MediaStore.Audio.Media.TRACK + " ASC");
 			
 			if(cursor == null || !cursor.moveToFirst()) {
 				return null;
 			}
 			
-			long[] songIds = new long[cursor.getCount()];
-			int index = 0;
+			SongInfoList list = new SongInfoList(cursor.getCount());
 			do {
-				songIds[index ++] = CursorHelper.getLong(cursor, MediaStore.Audio.Playlists.Members.AUDIO_ID);
+				list.addSongInfo(
+						CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID),
+						CursorHelper.getString(cursor, MediaStore.Audio.Media.TITLE));
 			} while(cursor.moveToNext());
 			
-			return new SongIdList(songIds);
-
+			return list;
+			
 		} finally {
 			if(cursor != null) {
 				cursor.close();
 			}
 		}
 	}
-
+	
 	@Override
-	protected void onPostExecute(SongIdList result) {
+	protected void onPostExecute(SongInfoList result) {
 		if(_listener != null) {
 			_listener.onFinishRetrieving(result);
 		}

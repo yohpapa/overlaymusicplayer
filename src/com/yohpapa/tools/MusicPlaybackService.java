@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.yohpapa.tools.task.MetaDataRetriever;
 
 import android.app.Service;
 import android.content.ContentUris;

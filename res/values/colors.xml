@@ -20,6 +20,8 @@
     <color name="overlay_artist_name">#343434</color>
     <color name="overlay_panel_background">#ffffff</color>
     <color name="overlay_open_background">#77ffffff</color>
+    <color name="overlay_list_font">#121212</color>
+    <color name="overlay_list_sub_font">#343434</color>
     
     <color name="list_font">#ffffff</color>
     <color name="list_sub_font">#cccccc</color>

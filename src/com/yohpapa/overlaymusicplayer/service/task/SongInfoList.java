@@ -14,16 +14,31 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools.task;
+package com.yohpapa.overlaymusicplayer.service.task;
 
 /**
  * @author YohPapa
  */
-public class SongIdList {
+public class SongInfoList {
 
 	public long[] songIds = null;
+	public String[] titles = null;
 	
-	public SongIdList(long[] songIds) {
-		this.songIds = songIds;
+	private int _position = 0;
+	
+	public SongInfoList(int length) {
+		songIds = new long[length];
+		titles = new String[length];
+		_position = 0;
+	}
+	
+	public void addSongInfo(long songId, String title) {
+		songIds[_position] = songId;
+		titles[_position] = title;
+		_position ++;
+	}
+	
+	public int getCount() {
+		return _position;
 	}
 }

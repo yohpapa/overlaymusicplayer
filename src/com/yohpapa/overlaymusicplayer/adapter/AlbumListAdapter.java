@@ -28,9 +28,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.yohpapa.overlaymusicplayer.R;
+import com.yohpapa.overlaymusicplayer.adapter.artwork.ArtworkCache;
+import com.yohpapa.overlaymusicplayer.adapter.artwork.ArtworkTask;
 import com.yohpapa.tools.CursorHelper;
-import com.yohpapa.tools.task.ArtworkCache;
-import com.yohpapa.tools.task.ArtworkTask;
 
 public class AlbumListAdapter extends CursorAdapter {
 	

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools.task;
+package com.yohpapa.overlaymusicplayer.service.task;
 
 public interface OnFinishRetrievingInfo {
-	void onFinishRetrieving(SongIdList idList);
+	void onFinishRetrieving(SongInfoList idList);
 }

@@ -17,8 +17,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.yohpapa.overlaymusicplayer"
-    android:versionCode="004"
-    android:versionName="0.0.4.DEBUG" >
+    android:versionCode="005"
+    android:versionName="0.0.5.DEBUG" >
     
 	<!--
 	Android 4.4					19	KITKAT

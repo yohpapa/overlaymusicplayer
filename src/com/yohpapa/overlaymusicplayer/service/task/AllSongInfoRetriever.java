@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools.task;
+package com.yohpapa.overlaymusicplayer.service.task;
 
 import com.yohpapa.tools.CursorHelper;
 
@@ -26,21 +26,20 @@ import android.provider.MediaStore;
 
 /**
  * @author YohPapa
+ *
  */
-public class ArtistSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
+public class AllSongInfoRetriever extends AsyncTask<Void, Void, SongInfoList> {
 
 	private Context _context = null;
-	private long _artistId = -1L;
 	private OnFinishRetrievingInfo _listener = null;
 	
-	public ArtistSongIdRetriever(Context context, long artistId, String artistName, OnFinishRetrievingInfo listener) {
+	public AllSongInfoRetriever(Context context, OnFinishRetrievingInfo listener) {
 		_context = context;
-		_artistId = artistId;
 		_listener = listener;
 	}
 	
 	@Override
-	protected SongIdList doInBackground(Void... args) {
+	protected SongInfoList doInBackground(Void... args) {
 		ContentResolver resolver = _context.getContentResolver();
 		if(resolver == null) {
 			return null;
@@ -52,21 +51,23 @@ public class ArtistSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 						MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 						new String[] {
 							MediaStore.Audio.Media._ID,
+							MediaStore.Audio.Media.TITLE,
 						},
-						MediaStore.Audio.Media.ARTIST_ID + "=?", new String[] {String.valueOf(_artistId)},
-						MediaStore.Audio.Media.ARTIST + " ASC");
+						MediaStore.Audio.Media.IS_MUSIC + "!=0", null,
+						MediaStore.Audio.Media.TITLE + " ASC");
 			
 			if(cursor == null || !cursor.moveToFirst()) {
 				return null;
 			}
 			
-			long[] songIds = new long[cursor.getCount()];
-			int index = 0;
+			SongInfoList list = new SongInfoList(cursor.getCount());
 			do {
-				songIds[index ++] = CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID);
+				list.addSongInfo(
+						CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID),
+						CursorHelper.getString(cursor, MediaStore.Audio.Media.TITLE));
 			} while(cursor.moveToNext());
 			
-			return new SongIdList(songIds);
+			return list;
 			
 		} finally {
 			if(cursor != null) {
@@ -76,7 +77,7 @@ public class ArtistSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 	}
 	
 	@Override
-	protected void onPostExecute(SongIdList result) {
+	protected void onPostExecute(SongInfoList result) {
 		if(_listener != null) {
 			_listener.onFinishRetrieving(result);
 		}

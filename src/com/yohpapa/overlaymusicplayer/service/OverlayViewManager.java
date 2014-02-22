@@ -27,18 +27,21 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.activity.MainActivity;
-import com.yohpapa.tools.task.MetaDataRetriever;
+import com.yohpapa.overlaymusicplayer.adapter.OverlaySongInfoListAdapter;
+import com.yohpapa.overlaymusicplayer.service.task.SongInfoList;
+import com.yohpapa.tools.MetaDataRetriever;
 
 /**
  * @author YohPapa
  */
 public class OverlayViewManager {
 	
-	private static final long AUTO_HIDE_TIMEOUT_MS = 3000L;
+	private static final long AUTO_HIDE_TIMEOUT_MS = 5000L;
 	
 	private Context _context = null;
 	
@@ -87,6 +90,7 @@ public class OverlayViewManager {
 			R.id.button_play_or_pause,
 			R.id.button_track_up,
 			R.id.button_stop,
+			R.id.button_open_close_list,
 		};
 		final View.OnClickListener[] panelListeners = new View.OnClickListener[] {
 			_onArtworkClickListener,
@@ -95,6 +99,7 @@ public class OverlayViewManager {
 			_onPlayPauseClickListener,
 			_onTrackUpClickListener,
 			_onStopClickListener,
+			_onOpenCloseListClickListener,
 		};
 		_panelView = inflater.inflate(R.layout.overlay_play_panel, null);
 		setupButtonListener(_panelView, panelButtonIds, panelListeners);
@@ -103,6 +108,15 @@ public class OverlayViewManager {
 		
 		View layout = _panelView.findViewById(R.id.layout_panel);
 		layout.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				startTimeoutTimer();
+				return false;
+			}
+		});
+		
+		ListView list = (ListView)_panelView.findViewById(R.id.list_current_songs);
+		list.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				startTimeoutTimer();
@@ -224,6 +238,21 @@ public class OverlayViewManager {
 		}
 	};
 	
+	private final View.OnClickListener _onOpenCloseListClickListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			
+			int visibility = View.VISIBLE;
+			View list = _panelView.findViewById(R.id.list_current_songs);
+			if(list.getVisibility() == View.VISIBLE) {
+				visibility = View.GONE;
+			}
+			list.setVisibility(visibility);
+			
+			startTimeoutTimer();
+		}
+	};
+	
 	private final View.OnClickListener _onOpenClickListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -238,6 +267,11 @@ public class OverlayViewManager {
 	private void showView(View view, WindowManager.LayoutParams params, boolean startTimer) {
 		if(_frontView == view) {
 			return;
+		}
+		
+		if(view == _panelView) {
+			View list = _panelView.findViewById(R.id.list_current_songs);
+			list.setVisibility(View.GONE);
 		}
 		
 		hide();
@@ -279,6 +313,27 @@ public class OverlayViewManager {
 		text = (TextView)_panelView.findViewById(R.id.text_artist_name);
 		text.setText(meta.artistName);
 	}
+	
+	public void setListInformation(SongInfoList info) {
+		ListView list = (ListView)_panelView.findViewById(R.id.list_current_songs);
+		OverlaySongInfoListAdapter adapter = (OverlaySongInfoListAdapter)list.getAdapter();
+		if(adapter == null || adapter.isChanged(info)) {
+			adapter = new OverlaySongInfoListAdapter(_context, info, _onListItemClickListener);
+			list.setAdapter(adapter);
+			adapter.notifyDataSetChanged();
+		}
+	}
+	
+	private final OverlaySongInfoListAdapter.OnClickListener _onListItemClickListener = new OverlaySongInfoListAdapter.OnClickListener() {
+		@Override
+		public void onClick(int position) {
+			Intent intent = new Intent(_context, OverlayMusicPlayerService.class);
+			intent.setAction(OverlayMusicPlayerService.ACTION_SELECT_INDEX);
+			intent.putExtra(OverlayMusicPlayerService.PRM_SONG_INDEX, position);
+			intent.putExtra(OverlayMusicPlayerService.PRM_NEED_TO_PLAY_AFTER_SELECT, true);
+			_context.startService(intent);
+		}
+	};
 	
 	public void setPlayState(boolean isPlaying) {
 		setupPlayPauseButton(_panelView, isPlaying);

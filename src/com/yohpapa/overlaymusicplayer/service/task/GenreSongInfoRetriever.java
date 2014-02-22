@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools.task;
+package com.yohpapa.overlaymusicplayer.service.task;
 
 import java.util.HashSet;
 
@@ -26,20 +26,20 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 
-public class GenreSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
+public class GenreSongInfoRetriever extends AsyncTask<Void, Void, SongInfoList> {
 
 	private final long _genreId;
 	private final Context _context;
 	private final OnFinishRetrievingInfo _onFinish;
 	
-	public GenreSongIdRetriever(Context context, long genreId, String genreName, OnFinishRetrievingInfo onFinish) {
+	public GenreSongInfoRetriever(Context context, long genreId, String genreName, OnFinishRetrievingInfo onFinish) {
 		_context = context;
 		_genreId = genreId;
 		_onFinish = onFinish;
 	}
 	
 	@Override
-	protected SongIdList doInBackground(Void... args) {
+	protected SongInfoList doInBackground(Void... args) {
 		
 		ContentResolver resolver = _context.getContentResolver();
 		if(resolver == null) {
@@ -60,7 +60,6 @@ public class GenreSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 				return null;
 			}
 			
-			int index = 0;
 			HashSet<String> songPaths = new HashSet<String>();
 			do {
 				songPaths.add(CursorHelper.getString(genreCursor, MediaStore.Audio.Genres.Members.DATA));
@@ -71,29 +70,33 @@ public class GenreSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 					new String[] {
 						MediaStore.Audio.Media._ID,
 						MediaStore.Audio.Media.DATA,
+						MediaStore.Audio.Media.TITLE,
 					},
 					null, null,
-					MediaStore.Audio.Media.TITLE + " ASC");
+					MediaStore.Audio.Media.ARTIST + " ASC, "	+
+					MediaStore.Audio.Media.ALBUM + " ASC, "	+
+					MediaStore.Audio.Media.TRACK + " ASC");
 			
 			if(mediaCursor == null || !mediaCursor.moveToFirst()) {
 				return null;
 			}
 			
+			SongInfoList list = new SongInfoList(songPaths.size());
 			long[] songIds = new long[songPaths.size()];
-			index = 0;
 			do {
-				
 				String path = CursorHelper.getString(mediaCursor, MediaStore.Audio.Media.DATA);
 				if(songPaths.contains(path)) {
-					songIds[index ++] = CursorHelper.getLong(mediaCursor, MediaStore.Audio.Media._ID);
-					if(index >= songIds.length) {
+					list.addSongInfo(
+							CursorHelper.getLong(mediaCursor, MediaStore.Audio.Media._ID),
+							CursorHelper.getString(mediaCursor, MediaStore.Audio.Media.TITLE));
+					if(list.getCount() >= songIds.length) {
 						break;
 					}
 				}
 				
 			} while(mediaCursor.moveToNext());
 			
-			return new SongIdList(songIds);
+			return list;
 			
 		} finally {
 			if(genreCursor != null) {
@@ -103,7 +106,7 @@ public class GenreSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 	}
 
 	@Override
-	protected void onPostExecute(SongIdList result) {
+	protected void onPostExecute(SongInfoList result) {
 		if(_onFinish != null) {
 			_onFinish.onFinishRetrieving(result);
 		}

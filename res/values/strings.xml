@@ -17,7 +17,8 @@
 
 <resources>
     <string name="app_name">Overlay Music Player</string>
-    <string name="desc_image_artwork"></string>
+    <string name="desc_image_artwork" />
+    <string name="desc_image_play_state" />
     
     <string name="msg_no_song">No song to play&#8230;</string>
     

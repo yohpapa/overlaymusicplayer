@@ -18,114 +18,138 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout_panel"
     android:background="@color/overlay_panel_background"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_gravity="right|center_vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     
-    <!-- Artwork image -->
-    <ImageButton android:id="@+id/image_artwork"
-        android:src="@drawable/ic_launcher"
-        android:contentDescription="@string/desc_image_artwork"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        android:layout_gravity="center"
-        android:layout_marginLeft="@dimen/overlay_layout_margin"
-        android:layout_width="@dimen/overlay_artwork_size"
-        android:layout_height="@dimen/overlay_artwork_size" />
-
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_gravity="center"
-        android:layout_margin="@dimen/overlay_layout_margin"
-        android:layout_width="@dimen/overlay_panel_width"
-        android:layout_height="@dimen/overlay_panel_height">
+        android:orientation="horizontal"
+        android:layout_gravity="right|center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
         
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            
-	        <!-- Title -->
-	        <TextView android:id="@+id/text_title"
-	            android:textSize="@dimen/overlay_title_font_size"
-	            android:textColor="@color/overlay_title"
+	    <!-- Artwork image -->
+	    <ImageButton android:id="@+id/image_artwork"
+	        android:src="@drawable/ic_launcher"
+	        android:contentDescription="@string/desc_image_artwork"
+	        android:background="@android:color/transparent"
+	        android:scaleType="fitCenter"
+	        android:layout_gravity="center"
+	        android:layout_marginLeft="@dimen/overlay_layout_margin"
+	        android:layout_width="@dimen/overlay_artwork_size"
+	        android:layout_height="@dimen/overlay_artwork_size" />
+	
+	    <LinearLayout
+	        android:orientation="vertical"
+	        android:layout_gravity="center"
+	        android:layout_margin="@dimen/overlay_layout_margin"
+	        android:layout_width="@dimen/overlay_panel_width"
+	        android:layout_height="@dimen/overlay_panel_height">
+	        
+	        <LinearLayout
+	            android:orientation="horizontal"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content">
+	            
+		        <!-- Title -->
+		        <TextView android:id="@+id/text_title"
+		            android:textSize="@dimen/overlay_title_font_size"
+		            android:textColor="@color/overlay_title"
+		            android:singleLine="true"
+		            android:ellipsize="end"
+		            android:layout_weight="1"
+		            android:layout_width="0dp"
+		            android:layout_height="wrap_content" />
+	            
+	            <!-- Hide button -->
+	            <Button android:id="@+id/button_hide"
+	                style="?android:attr/buttonBarButtonStyle"
+	                android:background="@android:drawable/ic_menu_delete"
+	                android:layout_marginLeft="@dimen/overlay_layout_margin"
+	                android:layout_width="@dimen/overlay_button_size"
+	                android:layout_height="@dimen/overlay_button_size" />
+		        
+	        </LinearLayout>
+	        
+	        <!-- Artist name -->
+	        <TextView android:id="@+id/text_artist_name"
+	            android:textSize="@dimen/overlay_artist_font_size"
+	            android:textColor="@color/overlay_artist_name"
 	            android:singleLine="true"
-	            android:ellipsize="end"
-	            android:layout_weight="1"
-	            android:layout_width="0dp"
+		        android:ellipsize="end"
+	            android:layout_marginTop="@dimen/overlay_layout_margin"
+	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content" />
-            
-            <!-- Hide button -->
-            <Button android:id="@+id/button_hide"
-                style="?android:attr/buttonBarButtonStyle"
-                android:background="@android:drawable/ic_menu_delete"
-                android:layout_marginLeft="@dimen/overlay_layout_margin"
-                android:layout_width="@dimen/overlay_button_size"
-                android:layout_height="@dimen/overlay_button_size" />
 	        
-        </LinearLayout>
-        
-        <!-- Artist name -->
-        <TextView android:id="@+id/text_artist_name"
-            android:textSize="@dimen/overlay_artist_font_size"
-            android:textColor="@color/overlay_artist_name"
-            android:singleLine="true"
-	        android:ellipsize="end"
-            android:layout_marginTop="@dimen/overlay_layout_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/overlay_layout_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            
-            <!-- Padding -->
-            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
-            
-            <!-- Track down button -->
-            <Button android:id="@+id/button_track_down"
-                style="?android:attr/buttonBarButtonStyle"
-                android:background="@android:drawable/ic_media_previous"
-                android:layout_width="@dimen/overlay_button_size"
-                android:layout_height="@dimen/overlay_button_size" />
-            
-            <!-- Padding -->
-            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
-            
-            <!-- Play or pause button -->
-            <Button android:id="@+id/button_play_or_pause"
-                style="?android:attr/buttonBarButtonStyle"
-                android:background="@android:drawable/ic_media_play"
-                android:layout_width="@dimen/overlay_button_size"
-                android:layout_height="@dimen/overlay_button_size" />
-            
-            <!-- Padding -->
-            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
-            
-            <!-- Track up button -->
-            <Button android:id="@+id/button_track_up"
-                style="?android:attr/buttonBarButtonStyle"
-                android:background="@android:drawable/ic_media_next"
-                android:layout_width="@dimen/overlay_button_size"
-                android:layout_height="@dimen/overlay_button_size" />
-
-            <!-- Padding -->
-            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
-            
-            <!-- Stop button -->
-            <Button android:id="@+id/button_stop"
-                style="?android:attr/buttonBarButtonStyle"
-                android:background="@android:drawable/ic_delete"
-                android:layout_width="@dimen/overlay_button_size"
-                android:layout_height="@dimen/overlay_button_size" />
-	        
-            <!-- Padding -->
-            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
-            
-        </LinearLayout>
-    </LinearLayout>
+	        <LinearLayout
+	            android:orientation="horizontal"
+	            android:layout_marginTop="@dimen/overlay_layout_margin"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content">
+	            
+	            <!-- Padding -->
+	            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
+	            
+	            <!-- Track down button -->
+	            <Button android:id="@+id/button_open_close_list"
+	                style="?android:attr/buttonBarButtonStyle"
+	                android:background="@android:drawable/ic_menu_agenda"
+	                android:layout_width="@dimen/overlay_button_size"
+	                android:layout_height="@dimen/overlay_button_size" />
+	            
+	            <!-- Padding -->
+	            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
+	            
+	            <!-- Track down button -->
+	            <Button android:id="@+id/button_track_down"
+	                style="?android:attr/buttonBarButtonStyle"
+	                android:background="@android:drawable/ic_media_previous"
+	                android:layout_width="@dimen/overlay_button_size"
+	                android:layout_height="@dimen/overlay_button_size" />
+	            
+	            <!-- Padding -->
+	            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
+	            
+	            <!-- Play or pause button -->
+	            <Button android:id="@+id/button_play_or_pause"
+	                style="?android:attr/buttonBarButtonStyle"
+	                android:background="@android:drawable/ic_media_play"
+	                android:layout_width="@dimen/overlay_button_size"
+	                android:layout_height="@dimen/overlay_button_size" />
+	            
+	            <!-- Padding -->
+	            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
+	            
+	            <!-- Track up button -->
+	            <Button android:id="@+id/button_track_up"
+	                style="?android:attr/buttonBarButtonStyle"
+	                android:background="@android:drawable/ic_media_next"
+	                android:layout_width="@dimen/overlay_button_size"
+	                android:layout_height="@dimen/overlay_button_size" />
+	
+	            <!-- Padding -->
+	            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
+	            
+	            <!-- Stop button -->
+	            <Button android:id="@+id/button_stop"
+	                style="?android:attr/buttonBarButtonStyle"
+	                android:background="@android:drawable/ic_menu_close_clear_cancel"
+	                android:layout_width="@dimen/overlay_button_size"
+	                android:layout_height="@dimen/overlay_button_size" />
+		        
+	            <!-- Padding -->
+	            <TextView android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content" />
+	            
+	        </LinearLayout>
+	    </LinearLayout>
     
+	</LinearLayout>
+	
+    <!-- Current selected songs' list -->
+    <ListView android:id="@+id/list_current_songs"
+        android:layout_gravity="right|center_vertical"
+        android:layout_width="@dimen/overlay_list_width"
+        android:layout_height="@dimen/overlay_list_height" />
+        
 </LinearLayout>

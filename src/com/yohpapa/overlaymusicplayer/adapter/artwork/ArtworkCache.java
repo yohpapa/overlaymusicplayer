@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools.task;
+package com.yohpapa.overlaymusicplayer.adapter.artwork;
 
 import java.util.HashSet;
 

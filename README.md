@@ -1,12 +1,11 @@
-Overlay music player
-==============
+# Overlay music player
 
-Simple music player which has a playback control panel on the top of any other app.
+Simple music player which has a playback control panel on the top of any other app. This app has been published on [Google Play].
+[Google Play]: https://play.google.com/store/apps/details?id=com.yohpapa.overlaymusicplayer "Jump to Google Play"
 
-License
-==============
+# License
 
-Copyright 2014 Kensuke Nakai<kemumaki.kemuo@gmail.com>
+Copyright 2014 Kensuke Nakai <kemumaki.kemuo@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

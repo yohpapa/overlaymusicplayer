@@ -18,7 +18,7 @@ package com.yohpapa.overlaymusicplayer.fragment;
 
 import android.os.Bundle;
 
-import com.yohpapa.tools.task.ArtworkCache;
+import com.yohpapa.overlaymusicplayer.adapter.artwork.ArtworkCache;
 
 /**
  * @author YohPapa

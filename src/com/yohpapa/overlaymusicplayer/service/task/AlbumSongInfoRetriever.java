@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.yohpapa.tools.task;
+package com.yohpapa.overlaymusicplayer.service.task;
 
 import com.yohpapa.tools.CursorHelper;
 
@@ -28,20 +28,20 @@ import android.provider.MediaStore;
  * @author YohPapa
  *
  */
-public class AlbumSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
+public class AlbumSongInfoRetriever extends AsyncTask<Void, Void, SongInfoList> {
 
 	private final long _albumId;
 	private final Context _context;
 	private final OnFinishRetrievingInfo _onFinish;
 	
-	public AlbumSongIdRetriever(Context context, long albumId, String albumName, OnFinishRetrievingInfo onFinish) {
+	public AlbumSongInfoRetriever(Context context, long albumId, String albumName, OnFinishRetrievingInfo onFinish) {
 		_context = context;
 		_albumId = albumId;
 		_onFinish = onFinish;
 	}
 	
 	@Override
-	protected SongIdList doInBackground(Void... params) {
+	protected SongInfoList doInBackground(Void... params) {
 		
 		ContentResolver resolver = _context.getContentResolver();
 		Cursor cursor = null;
@@ -50,6 +50,7 @@ public class AlbumSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[] {
                         MediaStore.Audio.Media._ID,
+                        MediaStore.Audio.Media.TITLE,
                     },
                     MediaStore.Audio.Media.ALBUM_ID + "=?", new String[] {String.valueOf(_albumId)},
                     MediaStore.Audio.Media.TRACK + " ASC");
@@ -58,14 +59,15 @@ public class AlbumSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 	        	return null;
 	        }
 	        
-	        long[] songIds = new long[cursor.getCount()];
-	        int index = 0;
+	        SongInfoList list = new SongInfoList(cursor.getCount());
 	        
 	        do {
-	        	songIds[index ++] = CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID);
+	        	list.addSongInfo(
+						CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID),
+						CursorHelper.getString(cursor, MediaStore.Audio.Media.TITLE));
 	        } while(cursor.moveToNext());
 	        
-			return new SongIdList(songIds);
+			return list;
 			
 		} finally {
 			if(cursor != null) {
@@ -75,7 +77,7 @@ public class AlbumSongIdRetriever extends AsyncTask<Void, Void, SongIdList> {
 	}
 
 	@Override
-	protected void onPostExecute(SongIdList result) {
+	protected void onPostExecute(SongInfoList result) {
 		if(_onFinish != null) {
 			_onFinish.onFinishRetrieving(result);
 		}

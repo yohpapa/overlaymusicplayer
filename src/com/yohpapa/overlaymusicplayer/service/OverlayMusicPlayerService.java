@@ -20,16 +20,16 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.yohpapa.overlaymusicplayer.R;
+import com.yohpapa.overlaymusicplayer.service.task.AlbumSongInfoRetriever;
+import com.yohpapa.overlaymusicplayer.service.task.AllSongInfoRetriever;
+import com.yohpapa.overlaymusicplayer.service.task.ArtistSongInfoRetriever;
+import com.yohpapa.overlaymusicplayer.service.task.GenreSongInfoRetriever;
+import com.yohpapa.overlaymusicplayer.service.task.OnFinishRetrievingInfo;
+import com.yohpapa.overlaymusicplayer.service.task.PlaylistSongInfoRetriever;
+import com.yohpapa.overlaymusicplayer.service.task.SongInfoList;
+import com.yohpapa.tools.MetaDataRetriever;
 import com.yohpapa.tools.MusicPlaybackService;
 import com.yohpapa.tools.ToastUtils;
-import com.yohpapa.tools.task.AlbumSongIdRetriever;
-import com.yohpapa.tools.task.AllSongIdRetriever;
-import com.yohpapa.tools.task.ArtistSongIdRetriever;
-import com.yohpapa.tools.task.GenreSongIdRetriever;
-import com.yohpapa.tools.task.MetaDataRetriever;
-import com.yohpapa.tools.task.OnFinishRetrievingInfo;
-import com.yohpapa.tools.task.PlaylistSongIdRetriever;
-import com.yohpapa.tools.task.SongIdList;
 
 public class OverlayMusicPlayerService extends MusicPlaybackService {
 
@@ -65,8 +65,12 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	public static final String ACTION_SEEK = BASE_URI + "ACTION_SEEK";
 	public static final String PRM_SEEK_TIME = BASE_URI + "PRM_SEEK_TIME";
 	
+	public static final String ACTION_SELECT_INDEX = BASE_URI + "ACTION_SELECT_INDEX";
+	public static final String PRM_SONG_INDEX = BASE_URI + "PRM_SONG_INDEX";
+	
 	private OverlayViewManager _overlayManager = null;
 	private NotificationViewManager _notificationManager = null;
+	private SongInfoList _currentSongList = null;
 	
 	@Override
 	public void onCreate() {
@@ -113,6 +117,8 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 			onActionTrackDown(intent);
 		} else if(ACTION_SEEK.equals(action)) {
 			onActionSeek(intent);
+		} else if(ACTION_SELECT_INDEX.equals(action)) {
+			onActionSelectIndex(intent);
 		} else {
 			Log.e(TAG, "Unknown request: " + action);
 		}
@@ -128,22 +134,24 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		}
 		final boolean needToPlay = intent.getBooleanExtra(PRM_NEED_TO_PLAY_AFTER_SELECT, false);
 		
-		GenreSongIdRetriever task = new GenreSongIdRetriever(this, genreId, genreName, new OnFinishRetrievingInfo() {
+		GenreSongInfoRetriever task = new GenreSongInfoRetriever(this, genreId, genreName, new OnFinishRetrievingInfo() {
 			@Override
-			public void onFinishRetrieving(SongIdList list) {
-				onRetrievedSongIdList(list, 0, needToPlay);
+			public void onFinishRetrieving(SongInfoList list) {
+				onRetrievedSongInfoList(list, 0, needToPlay);
 			}
 		});
 		task.execute();
 	}
 	
-	private void onRetrievedSongIdList(SongIdList list, int index, boolean needToPlay) {
+	private void onRetrievedSongInfoList(SongInfoList list, int index, boolean needToPlay) {
 		if(list == null) {
 			ToastUtils.show(OverlayMusicPlayerService.this, R.string.msg_no_song);
 			return;
 		}
 		
 		selectTrack(index, list.songIds);
+		
+		_currentSongList = list;
 		
 		if(needToPlay) {
 			playTrack();
@@ -159,10 +167,10 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		}
 		final boolean needToPlay = intent.getBooleanExtra(PRM_NEED_TO_PLAY_AFTER_SELECT, false);
 		
-		ArtistSongIdRetriever task = new ArtistSongIdRetriever(this, artistId, artistName, new OnFinishRetrievingInfo() {
+		ArtistSongInfoRetriever task = new ArtistSongInfoRetriever(this, artistId, artistName, new OnFinishRetrievingInfo() {
 			@Override
-			public void onFinishRetrieving(SongIdList list) {
-				onRetrievedSongIdList(list, 0, needToPlay);
+			public void onFinishRetrieving(SongInfoList list) {
+				onRetrievedSongInfoList(list, 0, needToPlay);
 			}
 		});
 		task.execute();
@@ -176,10 +184,10 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		}
 		final boolean needToPlay = intent.getBooleanExtra(PRM_NEED_TO_PLAY_AFTER_SELECT, false);
 		
-		AlbumSongIdRetriever task = new AlbumSongIdRetriever(this, albumId, albumName, new OnFinishRetrievingInfo() {
+		AlbumSongInfoRetriever task = new AlbumSongInfoRetriever(this, albumId, albumName, new OnFinishRetrievingInfo() {
 			@Override
-			public void onFinishRetrieving(SongIdList list) {
-				onRetrievedSongIdList(list, 0, needToPlay);
+			public void onFinishRetrieving(SongInfoList list) {
+				onRetrievedSongInfoList(list, 0, needToPlay);
 			}
 		});
 		task.execute();
@@ -193,10 +201,10 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		}
 		final boolean needToPlay = intent.getBooleanExtra(PRM_NEED_TO_PLAY_AFTER_SELECT, false);
 		
-		PlaylistSongIdRetriever task = new PlaylistSongIdRetriever(this, playlistId, playlistName, new OnFinishRetrievingInfo() {
+		PlaylistSongInfoRetriever task = new PlaylistSongInfoRetriever(this, playlistId, playlistName, new OnFinishRetrievingInfo() {
 			@Override
-			public void onFinishRetrieving(SongIdList list) {
-				onRetrievedSongIdList(list, 0, needToPlay);
+			public void onFinishRetrieving(SongInfoList list) {
+				onRetrievedSongInfoList(list, 0, needToPlay);
 			}
 		});
 		task.execute();
@@ -209,9 +217,9 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		}
 		final boolean needToPlay = intent.getBooleanExtra(PRM_NEED_TO_PLAY_AFTER_SELECT, false);
 		
-		AllSongIdRetriever task = new AllSongIdRetriever(this, new OnFinishRetrievingInfo() {
+		AllSongInfoRetriever task = new AllSongInfoRetriever(this, new OnFinishRetrievingInfo() {
 			@Override
-			public void onFinishRetrieving(SongIdList list) {
+			public void onFinishRetrieving(SongInfoList list) {
 				if(list == null || list.songIds == null || list.songIds.length <= 0) {
 					return;
 				}
@@ -223,7 +231,7 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 						break;
 					}
 				}
-				onRetrievedSongIdList(list, index, needToPlay);
+				onRetrievedSongInfoList(list, index, needToPlay);
 			}
 		});
 		task.execute();
@@ -259,11 +267,31 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		seekTrack(time);
 	}
 	
+	private void onActionSelectIndex(Intent intent) {
+		
+		if(_currentSongList == null) {
+			return;
+		}
+
+		int index = intent.getIntExtra(PRM_SONG_INDEX, -1);
+		if(index == -1) {
+			return;
+		}
+		
+		long[] songIds = _currentSongList.songIds;
+		if(songIds == null || index >= songIds.length) {
+			return;
+		}
+		
+		onRetrievedSongInfoList(_currentSongList, index, true);
+	}
+	
 	@Override
 	protected void onTrackChanged() {
 		MetaDataRetriever.MetaData meta = getCurrentTrackInfo();
 		
 		_overlayManager.setMetaInformation(meta);
+		_overlayManager.setListInformation(_currentSongList);
 		_notificationManager.updateMetaData(meta);
 	}
 	

@@ -25,8 +25,8 @@ import android.widget.ListAdapter;
 
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.adapter.GenreListAdapter;
+import com.yohpapa.overlaymusicplayer.fragment.loader.GenreCursorLoader;
 import com.yohpapa.overlaymusicplayer.service.OverlayMusicPlayerService;
-import com.yohpapa.tools.task.GenreCursorLoader;
 
 /**
  * @author YohPapa
