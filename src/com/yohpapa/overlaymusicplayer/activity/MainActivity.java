@@ -20,8 +20,11 @@ import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import com.yohpapa.overlaymusicplayer.R;
@@ -33,6 +36,7 @@ import com.yohpapa.overlaymusicplayer.fragment.SongListFragment;
 import com.yohpapa.tools.PrefUtils;
 
 public class MainActivity extends Activity {
+	private static final String TAG = MainActivity.class.getSimpleName();
 
 	private Fragment[] fragments = new Fragment[] {
 		GenreListFragment.getInstance(),
@@ -54,7 +58,30 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		setupViewPager();
 		setupActionBar();
+	}
+	
+	private void setupViewPager() {
+		ViewPager pager = (ViewPager)findViewById(R.id.fragment_pager);
+		pager.setAdapter(new TabPagerAdapter(getFragmentManager()));
+		pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				ActionBar bar = getActionBar();
+				bar.setSelectedNavigationItem(position);
+			}
+			
+			@Override
+			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+				Log.d(TAG, String.format("onPageScrolled(%d, %f, %d)", position, positionOffset, positionOffsetPixels));
+			}
+			
+			@Override
+			public void onPageScrollStateChanged(int state) {
+				Log.d(TAG, String.format("onPageScrollStateChanged(%d)", state));
+			}
+		});
 	}
 	
 	private void setupActionBar() {
@@ -67,25 +94,24 @@ public class MainActivity extends Activity {
 		
 		for(int i = 0; i < fragmentNames.length; i ++) {
 			
-			final Fragment fragment = fragments[i];
-			
 			ActionBar.Tab tab = bar.newTab();
 			tab.setText(fragmentNames[i]);
 			tab.setTabListener(new ActionBar.TabListener() {
 				@Override
 				public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-					Log.d("DEBUG", "onTabUnselected");
+					Log.d(TAG, "onTabUnselected");
 				}
 				
 				@Override
 				public void onTabSelected(Tab tab, FragmentTransaction ft) {
-					ft.replace(R.id.fragment_list, fragment);
+					ViewPager pager = (ViewPager)findViewById(R.id.fragment_pager);
+					pager.setCurrentItem(tab.getPosition());
 					PrefUtils.setInt(MainActivity.this, R.string.pref_last_tab_position, tab.getPosition());
 				}
 				
 				@Override
 				public void onTabReselected(Tab tab, FragmentTransaction ft) {
-					Log.d("DEBUG", "onTabReselected");
+					Log.d(TAG, "onTabReselected");
 				}
 			});
 			boolean isSelected = false;
@@ -93,6 +119,23 @@ public class MainActivity extends Activity {
 				isSelected = true;
 			}
 			bar.addTab(tab, isSelected);
+		}
+	}
+	
+	private class TabPagerAdapter extends FragmentPagerAdapter {
+
+		public TabPagerAdapter(FragmentManager fm) {
+			super(fm);
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			return fragments[position];
+		}
+
+		@Override
+		public int getCount() {
+			return fragments.length;
 		}
 	}
 }
