@@ -76,7 +76,12 @@ public abstract class CommonListFragment extends ListFragment implements LoaderC
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		
-		_lastPosition = getListLastPosition();
+		// It is not possible to get views on the fragment.
+		// The reason is not clear for me but I guess that ...
+		// It is because ViewPager which is parent for the fragment,
+		// destroys contents of the fragment on the process of transition
+		// to background.
+		
 		if(outState != null) {
 			outState.putInt("_lastPosition", _lastPosition);
 		}
