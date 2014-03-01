@@ -30,6 +30,7 @@ import android.util.Log;
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.fragment.AlbumListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.ArtistListFragment;
+import com.yohpapa.overlaymusicplayer.fragment.CommonListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.GenreListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.PlayListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.SongListFragment;
@@ -38,7 +39,7 @@ import com.yohpapa.tools.PrefUtils;
 public class MainActivity extends Activity {
 	private static final String TAG = MainActivity.class.getSimpleName();
 
-	private Fragment[] fragments = new Fragment[] {
+	private CommonListFragment[] fragments = new CommonListFragment[] {
 		GenreListFragment.getInstance(),
 		ArtistListFragment.getInstance(),
 		AlbumListFragment.getInstance(),
@@ -111,7 +112,8 @@ public class MainActivity extends Activity {
 				
 				@Override
 				public void onTabReselected(Tab tab, FragmentTransaction ft) {
-					Log.d(TAG, "onTabReselected");
+					CommonListFragment fragment = fragments[tab.getPosition()];
+					fragment.onTapWhenSelected();
 				}
 			});
 			boolean isSelected = false;

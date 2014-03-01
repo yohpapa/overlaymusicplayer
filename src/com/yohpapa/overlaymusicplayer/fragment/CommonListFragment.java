@@ -28,7 +28,7 @@ import android.widget.ListView;
 /**
  * @author YohPapa
  */
-public abstract class CommonListFragment extends ListFragment implements LoaderCallbacks<Cursor> {
+public abstract class CommonListFragment extends ListFragment implements LoaderCallbacks<Cursor>, OnTapSelectedTabListener {
 
 	private int _lastPosition = 0;
 	
@@ -76,11 +76,11 @@ public abstract class CommonListFragment extends ListFragment implements LoaderC
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		
-		// It is not possible to get views on the fragment.
+		// It is not possible to get contents, that is, views on the fragment.
 		// The reason is not clear for me but I guess that ...
 		// It is because ViewPager which is parent for the fragment,
 		// destroys contents of the fragment on the process of transition
-		// to background.
+		// from foreground to background.
 		
 		if(outState != null) {
 			outState.putInt("_lastPosition", _lastPosition);
@@ -107,4 +107,12 @@ public abstract class CommonListFragment extends ListFragment implements LoaderC
 	public void onLoaderReset(Loader<Cursor> loader) {}
 	
 	protected abstract void onClickItem(View view);
+	
+	@Override
+	public void onTapWhenSelected() {
+		if(isResumed()) {
+			ListView list = getListView();
+			list.setSelection(0);
+		}
+	}
 }
