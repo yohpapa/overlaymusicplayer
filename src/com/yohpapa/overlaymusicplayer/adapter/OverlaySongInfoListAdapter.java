@@ -17,6 +17,7 @@
 package com.yohpapa.overlaymusicplayer.adapter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.service.task.SongInfoList;
+import com.yohpapa.tools.PrefUtils;
 
 /**
  * @author YohPapa
@@ -40,10 +42,17 @@ public class OverlaySongInfoListAdapter extends BaseAdapter {
 	private SongInfoList _songInfoList = null;
 	private OnClickListener _listener = null;
 	
+	private final int TEXT_COLOR_DARK;
+	private final int TEXT_COLOR_LIGHT;
+	
 	public OverlaySongInfoListAdapter(Context context, SongInfoList list, OnClickListener listener) {
 		_context = context;
 		_songInfoList = list;
 		_listener = listener;
+		
+		Resources res = context.getResources();
+		TEXT_COLOR_DARK = res.getColor(R.color.overlay_title_dark);
+		TEXT_COLOR_LIGHT = res.getColor(R.color.overlay_title_light);
 	}
 
 	@Override
@@ -69,8 +78,17 @@ public class OverlaySongInfoListAdapter extends BaseAdapter {
 			view = inflater.inflate(R.layout.overlay_list_song_item, null);
 		}
 		
+		int color;
+		int colorMode = PrefUtils.getInt(_context, R.string.pref_foreground_color, 0);
+		if(colorMode == 0) {
+			color = TEXT_COLOR_DARK;
+		} else {
+			color = TEXT_COLOR_LIGHT;
+		}
+		
 		TextView index = (TextView)view.findViewById(R.id.text_track_index);
 		index.setText(String.valueOf(position + 1));
+		index.setTextColor(color);
 		
 		TextView title = (TextView)view.findViewById(R.id.text_title);
 		
@@ -80,6 +98,7 @@ public class OverlaySongInfoListAdapter extends BaseAdapter {
 		}
 		
 		title.setText(_songInfoList.titles[position]);
+		title.setTextColor(color);
 		
 		view.setOnClickListener(new View.OnClickListener() {
 			@Override

@@ -55,7 +55,7 @@
 		        <!-- Title -->
 		        <TextView android:id="@+id/text_title"
 		            android:textSize="@dimen/overlay_title_font_size"
-		            android:textColor="@color/overlay_title"
+		            android:textColor="@color/overlay_title_dark"
 		            android:singleLine="true"
 		            android:ellipsize="end"
 		            android:layout_weight="1"
@@ -73,7 +73,7 @@
 	        </LinearLayout>
 	        
 	        <!-- Artist name -->
-	        <TextView android:id="@+id/text_artist_name"
+	        <TextView android:id="@+id/text_artist"
 	            android:textSize="@dimen/overlay_artist_font_size"
 	            android:textColor="@color/overlay_artist_name"
 	            android:singleLine="true"

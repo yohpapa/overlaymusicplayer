@@ -18,6 +18,7 @@ package com.yohpapa.overlaymusicplayer.service;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.view.Gravity;
@@ -36,6 +37,7 @@ import com.yohpapa.overlaymusicplayer.activity.MainActivity;
 import com.yohpapa.overlaymusicplayer.adapter.OverlaySongInfoListAdapter;
 import com.yohpapa.overlaymusicplayer.service.task.SongInfoList;
 import com.yohpapa.tools.MetaDataRetriever;
+import com.yohpapa.tools.PrefUtils;
 
 /**
  * @author YohPapa
@@ -43,6 +45,9 @@ import com.yohpapa.tools.MetaDataRetriever;
 public class OverlayViewManager {
 	
 	private static final long AUTO_HIDE_TIMEOUT_MS = 5000L;
+	private final int TEXT_COLOR_DARK;
+	private final int TEXT_COLOR_LIGHT;
+
 	
 	private Context _context = null;
 	
@@ -61,6 +66,10 @@ public class OverlayViewManager {
 		_context = context;
 		_windowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 		_timeoutHandler = new Handler();
+		
+		Resources resources = _context.getResources();
+		TEXT_COLOR_DARK = resources.getColor(R.color.overlay_title_dark);
+		TEXT_COLOR_LIGHT = resources.getColor(R.color.overlay_title_light);
 		
 		_panelParams = new WindowManager.LayoutParams(
 				WindowManager.LayoutParams.WRAP_CONTENT,
@@ -115,6 +124,9 @@ public class OverlayViewManager {
 				return false;
 			}
 		});
+		int defaultColor = _context.getResources().getColor(R.color.overlay_panel_background);
+		int color = PrefUtils.getInt(_context, R.string.pref_background_color, defaultColor);
+		layout.setBackgroundColor(color);
 		
 		ListView list = (ListView)_panelView.findViewById(R.id.list_current_songs);
 		list.setOnTouchListener(new View.OnTouchListener() {
@@ -124,6 +136,19 @@ public class OverlayViewManager {
 				return false;
 			}
 		});
+		
+		int colorMode = PrefUtils.getInt(_context, R.string.pref_foreground_color, 0);
+		if(colorMode == 0) {
+			color = TEXT_COLOR_DARK;
+		} else {
+			color = TEXT_COLOR_LIGHT;
+		}
+		TextView text = (TextView)_panelView.findViewById(R.id.text_title);
+		text.setOnClickListener(_onTextClickListener);
+		text.setTextColor(color);
+		text = (TextView)_panelView.findViewById(R.id.text_artist);
+		text.setOnClickListener(_onTextClickListener);
+		text.setTextColor(color);
 		
 		final int[] openButtonIds = new int[] {
 			R.id.button_open,
@@ -169,6 +194,35 @@ public class OverlayViewManager {
 			button.setBackgroundResource(android.R.drawable.ic_media_play);
 		}
 	}
+	
+	private final View.OnClickListener _onTextClickListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			int color;
+			int colorMode = PrefUtils.getInt(_context, R.string.pref_foreground_color, 0);
+			colorMode = (colorMode + 1) % 2;
+			if(colorMode == 0) {
+				color = TEXT_COLOR_DARK;
+			} else {
+				color = TEXT_COLOR_LIGHT;
+			}
+			
+			TextView text = (TextView)_panelView.findViewById(R.id.text_title);
+			text.setTextColor(color);
+			text = (TextView)_panelView.findViewById(R.id.text_artist);
+			text.setTextColor(color);
+			
+			ListView list = (ListView)_panelView.findViewById(R.id.list_current_songs);
+			OverlaySongInfoListAdapter adapter = (OverlaySongInfoListAdapter)list.getAdapter();
+			if(adapter != null) {
+				adapter.notifyDataSetChanged();
+			}
+			
+			PrefUtils.setInt(_context, R.string.pref_foreground_color, colorMode);
+			
+			startTimeoutTimer();
+		}
+	};
 	
 	private final View.OnClickListener _onPlayPauseClickListener = new View.OnClickListener() {
 		@Override
@@ -311,7 +365,7 @@ public class OverlayViewManager {
 		TextView text = (TextView)_panelView.findViewById(R.id.text_title);
 		text.setText(meta.title);
 		
-		text = (TextView)_panelView.findViewById(R.id.text_artist_name);
+		text = (TextView)_panelView.findViewById(R.id.text_artist);
 		text.setText(meta.artistName);
 	}
 	

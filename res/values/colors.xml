@@ -16,7 +16,8 @@
 -->
 
 <resources>
-    <color name="overlay_title">#121212</color>
+    <color name="overlay_title_dark">#121212</color>
+    <color name="overlay_title_light">#ededed</color>
     <color name="overlay_artist_name">#343434</color>
     <color name="overlay_panel_background">#ffffff</color>
     <color name="overlay_open_background">#77ffffff</color>
