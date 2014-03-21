@@ -41,5 +41,8 @@
     <dimen name="list_font_size">20sp</dimen>
     <dimen name="list_sub_font_size">15sp</dimen>
     <dimen name="list_artwork_size">70dp</dimen>
+    
+    <dimen name="dialog_layout_margin">15dp</dimen>
+    <dimen name="dialog_license_text_size">15sp</dimen>
 
 </resources>

@@ -29,6 +29,7 @@ import com.yohpapa.overlaymusicplayer.service.task.PlaylistSongInfoRetriever;
 import com.yohpapa.overlaymusicplayer.service.task.SongInfoList;
 import com.yohpapa.tools.MetaDataRetriever;
 import com.yohpapa.tools.MusicPlaybackService;
+import com.yohpapa.tools.PrefUtils;
 import com.yohpapa.tools.ToastUtils;
 
 public class OverlayMusicPlayerService extends MusicPlaybackService {
@@ -67,6 +68,8 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	
 	public static final String ACTION_SELECT_INDEX = BASE_URI + "ACTION_SELECT_INDEX";
 	public static final String PRM_SONG_INDEX = BASE_URI + "PRM_SONG_INDEX";
+	
+	public static final String ACTION_CHANGE_SETTINGS = BASE_URI + "ACTION_CHANGE_SETTINGS";
 	
 	private OverlayViewManager _overlayManager = null;
 	private NotificationViewManager _notificationManager = null;
@@ -119,6 +122,8 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 			onActionSeek(intent);
 		} else if(ACTION_SELECT_INDEX.equals(action)) {
 			onActionSelectIndex(intent);
+		} else if(ACTION_CHANGE_SETTINGS.equals(action)) {
+			onActionChangeSettings(intent);
 		} else {
 			Log.e(TAG, "Unknown request: " + action);
 		}
@@ -284,6 +289,12 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		}
 		
 		onRetrievedSongInfoList(_currentSongList, index, true);
+	}
+	
+	private void onActionChangeSettings(Intent intent) {
+		int defaultColor = getResources().getColor(R.color.overlay_panel_background);
+		int color = PrefUtils.getInt(this, R.string.pref_background_color, defaultColor);
+		_overlayManager.setBackgroundColor(color);
 	}
 	
 	@Override

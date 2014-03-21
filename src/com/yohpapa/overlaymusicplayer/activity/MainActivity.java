@@ -33,18 +33,20 @@ import com.yohpapa.overlaymusicplayer.fragment.ArtistListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.CommonListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.GenreListFragment;
 import com.yohpapa.overlaymusicplayer.fragment.PlayListFragment;
+import com.yohpapa.overlaymusicplayer.fragment.SettingsFragment;
 import com.yohpapa.overlaymusicplayer.fragment.SongListFragment;
 import com.yohpapa.tools.PrefUtils;
 
 public class MainActivity extends Activity {
 	private static final String TAG = MainActivity.class.getSimpleName();
 
-	private CommonListFragment[] fragments = new CommonListFragment[] {
+	private Fragment[] fragments = new Fragment[] {
 		GenreListFragment.getInstance(),
 		ArtistListFragment.getInstance(),
 		AlbumListFragment.getInstance(),
 		PlayListFragment.getInstance(),
 		SongListFragment.getInstance(),
+		SettingsFragment.getInstance(),
 	};
 	private final int[] fragmentNames = {
 		R.string.tab_genres,
@@ -52,6 +54,7 @@ public class MainActivity extends Activity {
 		R.string.tab_albums,
 		R.string.tab_playlists,
 		R.string.tab_songs,
+		R.string.tab_settings,
 	};
 	
 	@Override
@@ -112,8 +115,10 @@ public class MainActivity extends Activity {
 				
 				@Override
 				public void onTabReselected(Tab tab, FragmentTransaction ft) {
-					CommonListFragment fragment = fragments[tab.getPosition()];
-					fragment.onTapWhenSelected();
+					Fragment fragment = fragments[tab.getPosition()];
+					if(fragment instanceof CommonListFragment) {
+						((CommonListFragment)fragment).onTapWhenSelected();
+					}
 				}
 			});
 			boolean isSelected = false;

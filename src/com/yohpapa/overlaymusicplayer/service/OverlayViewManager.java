@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -356,5 +357,10 @@ public class OverlayViewManager {
 	
 	private void stopTimeoutTimer() {
 		_timeoutHandler.removeCallbacks(_onTimerExpired);
+	}
+	
+	public void setBackgroundColor(int color) {
+		LinearLayout layout = (LinearLayout)_panelView.findViewById(R.id.layout_panel);
+		layout.setBackgroundColor(color);
 	}
 }
