@@ -146,8 +146,49 @@
     
 	</LinearLayout>
 	
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_gravity="right|center_vertical"
+        android:layout_marginBottom="@dimen/overlay_layout_margin"
+        android:layout_width="@dimen/overlay_list_width"
+        android:layout_height="wrap_content">
+        
+        <!-- Position of the song currently playing -->
+        <TextView android:id="@+id/text_position"
+            android:textSize="@dimen/overlay_artist_font_size"
+            android:textColor="@color/overlay_title_dark"
+		    android:singleLine="true"
+	        android:ellipsize="end"
+	        android:gravity="center"
+	        android:layout_gravity="center_vertical"
+            android:layout_width="@dimen/overlay_time_width"
+            android:layout_height="wrap_content"/>
+        
+        <!-- Bar to change position to play -->
+        <SeekBar android:id="@+id/seekbar_position"
+            android:layout_marginLeft="@dimen/overlay_layout_margin"
+            android:layout_marginRight="@dimen/overlay_layout_margin"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        
+        <!-- Duration of the song currently playing -->
+        <TextView android:id="@+id/text_duration"
+            android:textSize="@dimen/overlay_artist_font_size"
+            android:textColor="@color/overlay_title_dark"
+		    android:singleLine="true"
+	        android:ellipsize="end"
+	        android:gravity="center"
+	        android:layout_gravity="center_vertical"
+	        android:layout_marginRight="@dimen/overlay_layout_margin"
+            android:layout_width="@dimen/overlay_time_width"
+            android:layout_height="wrap_content"/>
+        
+    </LinearLayout>
+	
     <!-- Current selected songs' list -->
-    <ListView android:id="@+id/list_current_songs"
+    <se.emilsjolander.stickylistheaders.StickyListHeadersListView
+        android:id="@+id/list_current_songs"
         android:layout_gravity="right|center_vertical"
         android:layout_width="@dimen/overlay_list_width"
         android:layout_height="@dimen/overlay_list_height" />

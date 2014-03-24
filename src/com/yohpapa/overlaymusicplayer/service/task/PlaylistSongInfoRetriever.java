@@ -57,10 +57,12 @@ public class PlaylistSongInfoRetriever extends AsyncTask<Void, Void, SongInfoLis
 				return null;
 			}
 			
-			SongInfoList list = new SongInfoList(cursor.getCount());
+			SongInfoList list = new SongInfoList(cursor.getCount(), false);
+			int index = 0;
 			do {
 				list.addSongInfo(
 						CursorHelper.getLong(cursor, MediaStore.Audio.Playlists.Members.AUDIO_ID),
+						++ index,
 						CursorHelper.getString(cursor, MediaStore.Audio.Playlists.Members.TITLE));
 			} while(cursor.moveToNext());
 			

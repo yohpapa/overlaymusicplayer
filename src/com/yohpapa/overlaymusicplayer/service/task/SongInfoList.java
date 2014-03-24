@@ -21,20 +21,44 @@ package com.yohpapa.overlaymusicplayer.service.task;
  */
 public class SongInfoList {
 
+	public boolean isHeaderList = false;
+	
 	public long[] songIds = null;
+	public int[] songIndice = null;
 	public String[] titles = null;
+	public long[] albumIds = null;
+	public String[] artistNames = null;
 	
 	private int _position = 0;
 	
-	public SongInfoList(int length) {
+	public SongInfoList(int length, boolean hasHeader) {
+		isHeaderList = hasHeader;
 		songIds = new long[length];
+		songIndice = new int[length];
 		titles = new String[length];
 		_position = 0;
+		
+		if(hasHeader) {
+			albumIds = new long[length];
+			artistNames = new String[length];
+		}
 	}
 	
-	public void addSongInfo(long songId, String title) {
+	public void addSongInfo(long songId, int songIndex, String title, long albumId, String artistName) {
+		
+		if(isHeaderList) {
+			albumIds[_position] = albumId;
+			artistNames[_position] = artistName;
+		}
+		
+		addSongInfo(songId, songIndex, title);
+	}
+	
+	public void addSongInfo(long songId, int songIndex, String title) {
 		songIds[_position] = songId;
+		songIndice[_position] = songIndex;
 		titles[_position] = title;
+		
 		_position ++;
 	}
 	

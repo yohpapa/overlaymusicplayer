@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore;
@@ -61,6 +62,9 @@ public class MusicPlaybackService extends Service
     private MetaDataRetriever.MetaData currentTrackInfo = null;
 
     private float duckingVolumeLevel = 0.3f;
+    
+    private static final long TIMEOUT_TIMECODE_CHECK = 500;	// msec
+    private Handler periodicHandler = null;
 
     // ---------- Service lifecycle event handlers ----------
 
@@ -77,6 +81,8 @@ public class MusicPlaybackService extends Service
         player = initializePlayer();
         postProcesses = new ArrayList<Runnable>();
         currentTrackInfo = null;
+        
+        periodicHandler = new Handler();
     }
 
     @Override
@@ -89,6 +95,8 @@ public class MusicPlaybackService extends Service
 
         postProcesses.clear();
         state = STATE_FINISHED;
+        
+        stopTimecodeTimer();
     }
 
     @Override
@@ -117,6 +125,8 @@ public class MusicPlaybackService extends Service
         postProcesses.clear();
 
         onPlayStateChanged(PLAY_STATE_PLAYING);
+        
+        startTimecodeTimer();
 
         new MetaDataRetriever(this, trackIds[currentIndex], new MetaDataRetriever.OnRetrieveMetaDataFinished() {
             @Override
@@ -234,6 +244,8 @@ public class MusicPlaybackService extends Service
 
             player.start();
             onPlayStateChanged(PLAY_STATE_PLAYING);
+            
+            startTimecodeTimer();
         }
     }
 
@@ -249,6 +261,8 @@ public class MusicPlaybackService extends Service
             abandonAudioFocus();
             player.pause();
             onPlayStateChanged(PLAY_STATE_PAUSED);
+            
+            stopTimecodeTimer();
         }
     }
 
@@ -261,6 +275,8 @@ public class MusicPlaybackService extends Service
 
         stopSelf();
         onPlayStateChanged(PLAY_STATE_STOPPED);
+        
+        stopTimecodeTimer();
     }
 
     protected void selectTrack(int newIndex, long[] newTrackIds) {
@@ -276,16 +292,8 @@ public class MusicPlaybackService extends Service
             return;
         }
 
-        if(trackIds != null) {
-            long newTrackId = newTrackIds[newIndex];
-            long nowTrackId = trackIds[currentIndex];
-
-            if(nowTrackId == newTrackId) {
-                Log.d(TAG, "The track ID is not changed.");
-                trackIds = newTrackIds;
-                currentIndex = newIndex;
-                return;
-            }
+        if(!needToRefreshList(newTrackIds, newIndex)) {
+        	return;
         }
 
         trackIds = newTrackIds;
@@ -293,6 +301,35 @@ public class MusicPlaybackService extends Service
         positionToRestore = -1;
 
         prepareToPlay(newTrackIds[currentIndex]);
+    }
+    
+    private boolean needToRefreshList(long[] newTrackIds, int newIndex) {
+    	if(trackIds == null) {
+    		Log.d(TAG, "It is the first selection.");
+    		return true;
+    	}
+    	
+    	if(trackIds.length != newTrackIds.length) {
+    		Log.d(TAG, "The lengths of the lists are different.");
+    		return true;
+    	}
+    	
+    	for(int i = 0; i < trackIds.length; i ++) {
+            if(trackIds[i] != newTrackIds[i]) {
+            	Log.d(TAG, "The song IDs are different.");
+            	return true;
+            }
+    	}
+    	
+    	long newTrackId = newTrackIds[newIndex];
+        long nowTrackId = trackIds[currentIndex];
+
+        if(nowTrackId != newTrackId) {
+            Log.d(TAG, "The track ID has been changed.");
+            return true;
+        }
+    	
+    	return false;
     }
 
     protected void nextTrack() {
@@ -465,6 +502,26 @@ public class MusicPlaybackService extends Service
             }
         }
     };
+    
+    private void startTimecodeTimer() {
+    	periodicHandler.postDelayed(onTimecodeTimerFired, TIMEOUT_TIMECODE_CHECK);
+    }
+    
+    private void stopTimecodeTimer() {
+    	periodicHandler.removeCallbacks(onTimecodeTimerFired);
+    }
+    
+    private final Runnable onTimecodeTimerFired = new Runnable() {
+		@Override
+		public void run() {
+			if(player != null) {
+				int position = player.getCurrentPosition();
+				onTimecodeChanged(position);
+				
+				periodicHandler.postDelayed(this, TIMEOUT_TIMECODE_CHECK);
+			}
+		}
+	};
 
     // ---------- Player event handlers for a subclass ----------
 
@@ -478,5 +535,9 @@ public class MusicPlaybackService extends Service
 
     protected void onError(int what, int extra) {
         Log.d(TAG, "Please override me, onError what: " + what + ", extra: " + extra + "!");
+    }
+    
+    protected void onTimecodeChanged(int position) {
+    	Log.d(TAG, "Please override me, onTimecodeChanged position: " + position + "!");
     }
 }

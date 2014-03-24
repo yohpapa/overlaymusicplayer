@@ -313,4 +313,9 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 		_overlayManager.setPlayState(isPlaying);
 		_notificationManager.updatePlayState(isPlaying);
 	}
+	
+	@Override
+	protected void onTimecodeChanged(int position) {
+		_overlayManager.setPosition(position);
+	}
 }

@@ -53,6 +53,9 @@ public class ArtistSongInfoRetriever extends AsyncTask<Void, Void, SongInfoList>
 						new String[] {
 							MediaStore.Audio.Media._ID,
 							MediaStore.Audio.Media.TITLE,
+							MediaStore.Audio.Media.ALBUM_ID,
+							MediaStore.Audio.Media.ARTIST,
+							MediaStore.Audio.Media.TRACK,
 						},
 						MediaStore.Audio.Media.ARTIST_ID + "=?", new String[] {String.valueOf(_artistId)},
 						MediaStore.Audio.Media.ARTIST + " ASC, "	+
@@ -63,11 +66,27 @@ public class ArtistSongInfoRetriever extends AsyncTask<Void, Void, SongInfoList>
 				return null;
 			}
 			
-			SongInfoList list = new SongInfoList(cursor.getCount());
+			SongInfoList list = new SongInfoList(cursor.getCount(), true);
+			int indexOffset = -1;
+			long lastAlbumId = -1L;
 			do {
-				list.addSongInfo(
-						CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID),
-						CursorHelper.getString(cursor, MediaStore.Audio.Media.TITLE));
+	        	long albumId = CursorHelper.getLong(cursor, MediaStore.Audio.Media.ALBUM_ID);
+	        	if(lastAlbumId != albumId) {
+	        		indexOffset = -1;
+	        		lastAlbumId = albumId;
+	        	}
+	        	
+				int songIndex = CursorHelper.getInt(cursor, MediaStore.Audio.Media.TRACK);
+				if(indexOffset == -1) {
+					indexOffset = songIndex;
+				}
+				
+				long songId = CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID);
+	        	String title = CursorHelper.getString(cursor, MediaStore.Audio.Media.TITLE);
+	        	String artistName = CursorHelper.getString(cursor, MediaStore.Audio.Media.ARTIST);
+	        	
+				list.addSongInfo(songId, songIndex - indexOffset + 1, title, albumId, artistName);
+
 			} while(cursor.moveToNext());
 			
 			return list;

@@ -37,18 +37,21 @@ public class MetaDataRetriever extends AsyncTask<Void, Void, MetaDataRetriever.M
         public final String albumName;
         public final Bitmap artwork;
         public final Bitmap smallArtwork;
+        public final long duration;
 
-        public MetaData(long trackId, String title, String artistName, String albumName, Bitmap artwork, Bitmap smallArtwork) {
+        public MetaData(
+        		long trackId, String title, String artistName, String albumName, Bitmap artwork, Bitmap smallArtwork, long duration) {
             this.trackId = trackId;
             this.title = title;
             this.artistName = artistName;
             this.albumName = albumName;
             this.artwork = artwork;
             this.smallArtwork = smallArtwork;
+            this.duration = duration;
         }
 
         public MetaData deepCopy() {
-        	return new MetaData(this.trackId, this.title, this.artistName, this.albumName, this.artwork, this.smallArtwork);
+        	return new MetaData(this.trackId, this.title, this.artistName, this.albumName, this.artwork, this.smallArtwork, this.duration);
         }
     }
 
@@ -87,6 +90,7 @@ public class MetaDataRetriever extends AsyncTask<Void, Void, MetaDataRetriever.M
                             MediaStore.Audio.Media.ARTIST,
                             MediaStore.Audio.Media.ALBUM,
                             MediaStore.Audio.Media.ALBUM_ID,
+                            MediaStore.Audio.Media.DURATION,
                     }, null, null, null);
 
             if(trackCursor == null || !trackCursor.moveToFirst() || trackCursor.getCount() != 1) {
@@ -97,6 +101,7 @@ public class MetaDataRetriever extends AsyncTask<Void, Void, MetaDataRetriever.M
             String artist = CursorHelper.getString(trackCursor, MediaStore.Audio.Media.ARTIST);
             String album = CursorHelper.getString(trackCursor, MediaStore.Audio.Media.ALBUM);
             long albumId = CursorHelper.getLong(trackCursor, MediaStore.Audio.Media.ALBUM_ID);
+            long duration = CursorHelper.getLong(trackCursor, MediaStore.Audio.Media.DURATION);
             Bitmap artwork = null;
 
             if(albumId != -1L) {
@@ -111,7 +116,7 @@ public class MetaDataRetriever extends AsyncTask<Void, Void, MetaDataRetriever.M
                         }, null, null, null);
 
                 if(albumCursor == null || !albumCursor.moveToFirst() || albumCursor.getCount() != 1) {
-                    return new MetaData(trackId, title, artist, album, null, null);
+                    return new MetaData(trackId, title, artist, album, null, null, duration);
                 }
 
                 String artworkPath = CursorHelper.getString(albumCursor, MediaStore.Audio.Albums.ALBUM_ART);
@@ -135,7 +140,7 @@ public class MetaDataRetriever extends AsyncTask<Void, Void, MetaDataRetriever.M
             	smallIcon = Bitmap.createScaledBitmap(artwork, (int)(width * ratio), (int)(height * ratio), false);
             }
             
-            return new MetaData(trackId, title, artist, album, artwork, smallIcon);
+            return new MetaData(trackId, title, artist, album, artwork, smallIcon, duration);
 
         } finally {
             if(trackCursor != null) {

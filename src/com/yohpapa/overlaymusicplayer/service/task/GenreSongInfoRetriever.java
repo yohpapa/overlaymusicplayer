@@ -71,24 +71,43 @@ public class GenreSongInfoRetriever extends AsyncTask<Void, Void, SongInfoList> 
 						MediaStore.Audio.Media._ID,
 						MediaStore.Audio.Media.DATA,
 						MediaStore.Audio.Media.TITLE,
+						MediaStore.Audio.Media.ALBUM_ID,
+						MediaStore.Audio.Media.ARTIST,
+						MediaStore.Audio.Media.TRACK,
 					},
 					null, null,
-					MediaStore.Audio.Media.ARTIST + " ASC, "	+
-					MediaStore.Audio.Media.ALBUM + " ASC, "	+
+					MediaStore.Audio.Media.ARTIST + " ASC, " +
+					MediaStore.Audio.Media.ALBUM + " ASC, " +
 					MediaStore.Audio.Media.TRACK + " ASC");
 			
 			if(mediaCursor == null || !mediaCursor.moveToFirst()) {
 				return null;
 			}
 			
-			SongInfoList list = new SongInfoList(songPaths.size());
+			SongInfoList list = new SongInfoList(songPaths.size(), true);
 			long[] songIds = new long[songPaths.size()];
+			int indexOffset = -1;
+			long lastAlbumId = -1L;
 			do {
 				String path = CursorHelper.getString(mediaCursor, MediaStore.Audio.Media.DATA);
 				if(songPaths.contains(path)) {
-					list.addSongInfo(
-							CursorHelper.getLong(mediaCursor, MediaStore.Audio.Media._ID),
-							CursorHelper.getString(mediaCursor, MediaStore.Audio.Media.TITLE));
+					
+		        	long albumId = CursorHelper.getLong(mediaCursor, MediaStore.Audio.Media.ALBUM_ID);
+		        	if(lastAlbumId != albumId) {
+		        		indexOffset = -1;
+		        		lastAlbumId = albumId;
+		        	}
+		        	
+					int songIndex = CursorHelper.getInt(mediaCursor, MediaStore.Audio.Media.TRACK);
+					if(indexOffset == -1) {
+						indexOffset = songIndex;
+					}
+					
+					long songId = CursorHelper.getLong(mediaCursor, MediaStore.Audio.Media._ID);
+		        	String title = CursorHelper.getString(mediaCursor, MediaStore.Audio.Media.TITLE);
+		        	String artistName = CursorHelper.getString(mediaCursor, MediaStore.Audio.Media.ARTIST);
+		        	
+					list.addSongInfo(songId, songIndex - indexOffset + 1, title, albumId, artistName);
 					if(list.getCount() >= songIds.length) {
 						break;
 					}

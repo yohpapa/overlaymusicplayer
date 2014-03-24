@@ -16,15 +16,20 @@
 
 package com.yohpapa.overlaymusicplayer.adapter;
 
+import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.yohpapa.overlaymusicplayer.R;
+import com.yohpapa.overlaymusicplayer.adapter.artwork.ArtworkCache;
+import com.yohpapa.overlaymusicplayer.adapter.artwork.ArtworkTask;
 import com.yohpapa.overlaymusicplayer.service.task.SongInfoList;
 import com.yohpapa.tools.PrefUtils;
 
@@ -32,18 +37,30 @@ import com.yohpapa.tools.PrefUtils;
  * @author YohPapa
  *
  */
-public class OverlaySongInfoListAdapter extends BaseAdapter {
+public class OverlaySongInfoListAdapter extends BaseAdapter implements StickyListHeadersAdapter {
 	
 	public interface OnClickListener {
 		void onClick(int position);
 	}
 	
+	class HeaderViewHolder {
+		public ImageView artwork;
+		public TextView artist;
+	}
+	
+	class SongViewHolder {
+		public TextView trackIndex;
+		public TextView title;
+	}
+	
 	private Context _context = null;
 	private SongInfoList _songInfoList = null;
 	private OnClickListener _listener = null;
+	private ArtworkCache _artworkCache = null;
 	
 	private final int TEXT_COLOR_DARK;
 	private final int TEXT_COLOR_LIGHT;
+	private int _textColor = 0;
 	
 	public OverlaySongInfoListAdapter(Context context, SongInfoList list, OnClickListener listener) {
 		_context = context;
@@ -53,6 +70,11 @@ public class OverlaySongInfoListAdapter extends BaseAdapter {
 		Resources res = context.getResources();
 		TEXT_COLOR_DARK = res.getColor(R.color.overlay_title_dark);
 		TEXT_COLOR_LIGHT = res.getColor(R.color.overlay_title_light);
+		_textColor = getTextColor();
+		
+		if(list.isHeaderList) {
+			_artworkCache = new ArtworkCache(context);
+		}
 	}
 
 	@Override
@@ -76,29 +98,28 @@ public class OverlaySongInfoListAdapter extends BaseAdapter {
 		if(view == null) {
 			LayoutInflater inflater = (LayoutInflater)_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view = inflater.inflate(R.layout.overlay_list_song_item, null);
+			SongViewHolder holder = new SongViewHolder();
+			holder.trackIndex = (TextView)view.findViewById(R.id.text_track_index);
+			holder.title = (TextView)view.findViewById(R.id.text_title);
+			view.setTag(holder);
 		}
 		
-		int color;
-		int colorMode = PrefUtils.getInt(_context, R.string.pref_foreground_color, 0);
-		if(colorMode == 0) {
-			color = TEXT_COLOR_DARK;
-		} else {
-			color = TEXT_COLOR_LIGHT;
-		}
-		
-		TextView index = (TextView)view.findViewById(R.id.text_track_index);
-		index.setText(String.valueOf(position + 1));
-		index.setTextColor(color);
-		
-		TextView title = (TextView)view.findViewById(R.id.text_title);
-		
-		if(_songInfoList.getCount() <= position) {
-			title.setText(null);
+		if(position >= _songInfoList.getCount()) {
 			return view;
 		}
 		
-		title.setText(_songInfoList.titles[position]);
-		title.setTextColor(color);
+		SongViewHolder holder = (SongViewHolder)view.getTag();
+		
+		holder.trackIndex.setText(String.valueOf(_songInfoList.songIndice[position]));
+		holder.trackIndex.setTextColor(_textColor);
+		
+		if(_songInfoList.getCount() <= position) {
+			holder.title.setText(null);
+			return view;
+		}
+		
+		holder.title.setText(_songInfoList.titles[position]);
+		holder.title.setTextColor(_textColor);
 		
 		view.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -110,6 +131,15 @@ public class OverlaySongInfoListAdapter extends BaseAdapter {
 		});
 		
 		return view;
+	}
+	
+	private int getTextColor() {
+		int colorMode = PrefUtils.getInt(_context, R.string.pref_foreground_color, 0);
+		if(colorMode == 0) {
+			return TEXT_COLOR_DARK;
+		} else {
+			return TEXT_COLOR_LIGHT;
+		}
 	}
 	
 	public boolean isChanged(SongInfoList list) {
@@ -149,5 +179,68 @@ public class OverlaySongInfoListAdapter extends BaseAdapter {
 		}
 		
 		return false;
+	}
+
+	@Override
+	public View getHeaderView(int position, View view, ViewGroup parent) {
+		
+		if(!_songInfoList.isHeaderList) {
+			if(view == null) {
+				view = new View(_context);
+			}
+			return view;
+		}
+		
+		if(view == null) {
+			LayoutInflater inflater = (LayoutInflater)_context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			view = inflater.inflate(R.layout.overlay_list_header_item, null);
+			HeaderViewHolder holder = new HeaderViewHolder();
+			holder.artwork = (ImageView)view.findViewById(R.id.image_artwork);
+			holder.artist = (TextView)view.findViewById(R.id.text_artist);
+			view.setTag(holder);
+		}
+		
+		if(position >= _songInfoList.getCount()) {
+			return view;
+		}
+		
+		long albumId = _songInfoList.albumIds[position];
+		HeaderViewHolder holder = (HeaderViewHolder)view.getTag();
+		
+		Bitmap artwork = _artworkCache.get(albumId);
+		if(artwork != null) {
+			holder.artwork.setImageBitmap(artwork);
+		} else {
+			new ArtworkTask(_context, albumId, holder.artwork, _artworkCache).execute();
+		}
+		holder.artwork.setTag(R.id.tag_album_id, albumId);
+		
+		holder.artist.setTextColor(_textColor);
+		holder.artist.setText(_songInfoList.artistNames[position]);
+		
+		return view;
+	}
+
+	@Override
+	public long getHeaderId(int position) {
+		if(!_songInfoList.isHeaderList) {
+			return 0;
+		}
+		
+		if(position >= _songInfoList.getCount()) {
+			return 0;
+		}
+		
+		return _songInfoList.albumIds[position];
+	}
+	
+	public void setTextColor(int color) {
+		_textColor = color;
+	}
+	
+	public void clearArtworkCache() {
+		if(_artworkCache != null) {
+			_artworkCache.clear();
+		}
 	}
 }

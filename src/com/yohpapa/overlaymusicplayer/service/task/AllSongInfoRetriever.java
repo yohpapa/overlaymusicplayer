@@ -60,10 +60,12 @@ public class AllSongInfoRetriever extends AsyncTask<Void, Void, SongInfoList> {
 				return null;
 			}
 			
-			SongInfoList list = new SongInfoList(cursor.getCount());
+			SongInfoList list = new SongInfoList(cursor.getCount(), false);
+			int index = 0;
 			do {
 				list.addSongInfo(
 						CursorHelper.getLong(cursor, MediaStore.Audio.Media._ID),
+						++ index,
 						CursorHelper.getString(cursor, MediaStore.Audio.Media.TITLE));
 			} while(cursor.moveToNext());
 			

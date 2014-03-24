@@ -16,6 +16,7 @@
 
 package com.yohpapa.overlaymusicplayer.service;
 
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -29,7 +30,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.yohpapa.overlaymusicplayer.R;
@@ -38,6 +39,7 @@ import com.yohpapa.overlaymusicplayer.adapter.OverlaySongInfoListAdapter;
 import com.yohpapa.overlaymusicplayer.service.task.SongInfoList;
 import com.yohpapa.tools.MetaDataRetriever;
 import com.yohpapa.tools.PrefUtils;
+import com.yohpapa.tools.TimecodeUtils;
 
 /**
  * @author YohPapa
@@ -47,7 +49,13 @@ public class OverlayViewManager {
 	private static final long AUTO_HIDE_TIMEOUT_MS = 5000L;
 	private final int TEXT_COLOR_DARK;
 	private final int TEXT_COLOR_LIGHT;
-
+	
+	private static final int[] panelTextIds = new int[] {
+		R.id.text_title,
+		R.id.text_artist,
+		R.id.text_position,
+		R.id.text_duration,
+	};
 	
 	private Context _context = null;
 	
@@ -128,12 +136,42 @@ public class OverlayViewManager {
 		int color = PrefUtils.getInt(_context, R.string.pref_background_color, defaultColor);
 		layout.setBackgroundColor(color);
 		
-		ListView list = (ListView)_panelView.findViewById(R.id.list_current_songs);
+		StickyListHeadersListView list = (StickyListHeadersListView)_panelView.findViewById(R.id.list_current_songs);
 		list.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				startTimeoutTimer();
 				return false;
+			}
+		});
+		list.setDrawingListUnderStickyHeader(false);
+		
+		SeekBar bar = (SeekBar)_panelView.findViewById(R.id.seekbar_position);
+		bar.setTag(R.id.tag_is_dragging, false);
+		bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				seekBar.setTag(R.id.tag_is_dragging, false);
+				startTimeoutTimer();
+				
+				Intent intent = new Intent(_context, OverlayMusicPlayerService.class);
+				intent.setAction(OverlayMusicPlayerService.ACTION_SEEK);
+				intent.putExtra(OverlayMusicPlayerService.PRM_SEEK_TIME, seekBar.getProgress());
+				_context.startService(intent);
+			}
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				seekBar.setTag(R.id.tag_is_dragging, true);
+				stopTimeoutTimer();
+			}
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				if(fromUser) {
+					TextView time = (TextView)_panelView.findViewById(R.id.text_position);
+					time.setText(TimecodeUtils.format(progress));
+				}
 			}
 		});
 		
@@ -143,12 +181,7 @@ public class OverlayViewManager {
 		} else {
 			color = TEXT_COLOR_LIGHT;
 		}
-		TextView text = (TextView)_panelView.findViewById(R.id.text_title);
-		text.setOnClickListener(_onTextClickListener);
-		text.setTextColor(color);
-		text = (TextView)_panelView.findViewById(R.id.text_artist);
-		text.setOnClickListener(_onTextClickListener);
-		text.setTextColor(color);
+		setTextColorConfiguration(_panelView, panelTextIds, color);
 		
 		final int[] openButtonIds = new int[] {
 			R.id.button_open,
@@ -177,6 +210,14 @@ public class OverlayViewManager {
 		});
 	}
 	
+	private void setTextColorConfiguration(View view, final int[] ids, int color) {
+		for(int id : ids) {
+			TextView text = (TextView)_panelView.findViewById(id);
+			text.setOnClickListener(_onTextClickListener);
+			text.setTextColor(color);
+		}
+	}
+	
 	private void setupButtonListener(View parent, int[] ids, View.OnClickListener[] listeners) {
 		
 		for(int i = 0; i < ids.length; i ++) {
@@ -198,23 +239,26 @@ public class OverlayViewManager {
 	private final View.OnClickListener _onTextClickListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			int color;
 			int colorMode = PrefUtils.getInt(_context, R.string.pref_foreground_color, 0);
 			colorMode = (colorMode + 1) % 2;
+			int color;
 			if(colorMode == 0) {
 				color = TEXT_COLOR_DARK;
 			} else {
 				color = TEXT_COLOR_LIGHT;
 			}
 			
+			setTextColorConfiguration(_panelView, panelTextIds, color);
+			
 			TextView text = (TextView)_panelView.findViewById(R.id.text_title);
 			text.setTextColor(color);
 			text = (TextView)_panelView.findViewById(R.id.text_artist);
 			text.setTextColor(color);
 			
-			ListView list = (ListView)_panelView.findViewById(R.id.list_current_songs);
+			StickyListHeadersListView list = (StickyListHeadersListView)_panelView.findViewById(R.id.list_current_songs);
 			OverlaySongInfoListAdapter adapter = (OverlaySongInfoListAdapter)list.getAdapter();
 			if(adapter != null) {
+				adapter.setTextColor(color);
 				adapter.notifyDataSetChanged();
 			}
 			
@@ -367,12 +411,27 @@ public class OverlayViewManager {
 		
 		text = (TextView)_panelView.findViewById(R.id.text_artist);
 		text.setText(meta.artistName);
+		
+		text = (TextView)_panelView.findViewById(R.id.text_position);
+		text.setText(TimecodeUtils.START_POSITION);
+		
+		SeekBar bar = (SeekBar)_panelView.findViewById(R.id.seekbar_position);
+		bar.setMax((int)meta.duration);
+		bar.setProgress(0);
+		
+		text = (TextView)_panelView.findViewById(R.id.text_duration);
+		text.setText(TimecodeUtils.format(meta.duration));
 	}
 	
 	public void setListInformation(SongInfoList info) {
-		ListView list = (ListView)_panelView.findViewById(R.id.list_current_songs);
+		StickyListHeadersListView list = (StickyListHeadersListView)_panelView.findViewById(R.id.list_current_songs);
 		OverlaySongInfoListAdapter adapter = (OverlaySongInfoListAdapter)list.getAdapter();
 		if(adapter == null || adapter.isChanged(info)) {
+			
+			if(adapter != null) {
+				adapter.clearArtworkCache();
+			}
+			
 			adapter = new OverlaySongInfoListAdapter(_context, info, _onListItemClickListener);
 			list.setAdapter(adapter);
 			adapter.notifyDataSetChanged();
@@ -416,5 +475,18 @@ public class OverlayViewManager {
 	public void setBackgroundColor(int color) {
 		LinearLayout layout = (LinearLayout)_panelView.findViewById(R.id.layout_panel);
 		layout.setBackgroundColor(color);
+	}
+	
+	public void setPosition(int position) {
+		SeekBar bar = (SeekBar)_panelView.findViewById(R.id.seekbar_position);
+		Boolean isDragging = (Boolean)bar.getTag(R.id.tag_is_dragging);
+		if(isDragging) {
+			return;
+		}
+		
+		bar.setProgress(position);
+		
+		TextView text = (TextView)_panelView.findViewById(R.id.text_position);
+		text.setText(TimecodeUtils.format(position));
 	}
 }
