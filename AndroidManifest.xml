@@ -17,11 +17,12 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.yohpapa.overlaymusicplayer"
-    android:versionCode="017"
-    android:versionName="0.1.7" >
+    android:versionCode="018"
+    android:versionName="0.1.8" >
     
 	<!--
-	Android 4.4					19	KITKAT
+	Android 4.4W				20	Android Wear
+	Android 4.4.2				19	KITKAT
 	Android 4.3					18	JELLY_BEAN_MR2
 	Android 4.2, 4.2.2			17	JELLY_BEAN_MR1
 	Android 4.1, 4.1.1			16	JELLY_BEAN
@@ -42,10 +43,11 @@
     
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="20" />
     
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".OverlayMusicPlayerApp"
