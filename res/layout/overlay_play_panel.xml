@@ -26,7 +26,7 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_gravity="right|center_vertical"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/overlay_list_width"
         android:layout_height="wrap_content">
         
 	    <!-- Artwork image -->
@@ -43,8 +43,9 @@
 	    <LinearLayout
 	        android:orientation="vertical"
 	        android:layout_gravity="center"
+	        android:layout_weight="1"
 	        android:layout_margin="@dimen/overlay_layout_margin"
-	        android:layout_width="@dimen/overlay_panel_width"
+	        android:layout_width="0dp"
 	        android:layout_height="@dimen/overlay_panel_height">
 	        
 	        <LinearLayout

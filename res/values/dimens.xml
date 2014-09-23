@@ -22,14 +22,13 @@
     
     <dimen name="overlay_layout_margin">5dp</dimen>
     
-    <dimen name="overlay_panel_width">250dp</dimen>
     <dimen name="overlay_panel_height">100dp</dimen>
-    <dimen name="overlay_artwork_size">70dp</dimen>
+    <dimen name="overlay_artwork_size">60dp</dimen>
     <dimen name="overlay_small_artwork_size">35dp</dimen>
     <dimen name="overlay_title_font_size">20sp</dimen>
     <dimen name="overlay_artist_font_size">15sp</dimen>
     <dimen name="overlay_button_size">30dp</dimen>
-    <dimen name="overlay_list_width">335dp</dimen>
+    <dimen name="overlay_list_width">300dp</dimen>
     <dimen name="overlay_list_height">150dp</dimen>
     <dimen name="overlay_list_font_size">15sp</dimen>
     <dimen name="overlay_list_index_width">50dp</dimen>
