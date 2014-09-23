@@ -70,6 +70,9 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	public static final String PRM_SONG_INDEX = BASE_URI + "PRM_SONG_INDEX";
 	
 	public static final String ACTION_CHANGE_SETTINGS = BASE_URI + "ACTION_CHANGE_SETTINGS";
+	public static final String PRM_SETTING_TYPE = BASE_URI + "PRM_SETTING_TYPE";
+	public static final int PRM_BACKGROUND_COLOR = 0;
+	public static final int PRM_TIME_TO_HIDE = 1;
 	
 	private OverlayViewManager _overlayManager = null;
 	private NotificationViewManager _notificationManager = null;
@@ -292,9 +295,14 @@ public class OverlayMusicPlayerService extends MusicPlaybackService {
 	}
 	
 	private void onActionChangeSettings(Intent intent) {
-		int defaultColor = getResources().getColor(R.color.overlay_panel_background);
-		int color = PrefUtils.getInt(this, R.string.pref_background_color, defaultColor);
-		_overlayManager.setBackgroundColor(color);
+		int type = intent.getIntExtra(PRM_SETTING_TYPE, PRM_BACKGROUND_COLOR);
+		if(type == PRM_BACKGROUND_COLOR) {
+			int defaultColor = getResources().getColor(R.color.overlay_panel_background);
+			int color = PrefUtils.getInt(this, R.string.pref_background_color, defaultColor);
+			_overlayManager.setBackgroundColor(color);
+		} else if(type == PRM_TIME_TO_HIDE) {
+			_overlayManager.refreshTimeoutTimer();
+		}
 	}
 	
 	@Override

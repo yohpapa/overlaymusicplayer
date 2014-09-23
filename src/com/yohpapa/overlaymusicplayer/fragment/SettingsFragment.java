@@ -26,9 +26,11 @@ import android.preference.PreferenceFragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.yohpapa.overlaymusicplayer.AppVersion;
+import com.yohpapa.overlaymusicplayer.OverlayMusicPlayerApp;
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.service.OverlayMusicPlayerService;
 import com.yohpapa.tools.AssetsUtils;
@@ -62,7 +64,60 @@ public class SettingsFragment extends PreferenceFragment {
 				
 				Intent intent = new Intent(context, OverlayMusicPlayerService.class);
 				intent.setAction(OverlayMusicPlayerService.ACTION_CHANGE_SETTINGS);
+				intent.putExtra(OverlayMusicPlayerService.PRM_SETTING_TYPE, OverlayMusicPlayerService.PRM_BACKGROUND_COLOR);
 				context.startService(intent);
+				return true;
+			}
+		});
+		
+		updateTimeToHideSummary();
+		pref = findPreference(parent.getString(R.string.pref_key_time_to_hide));
+		pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+			
+			private int _tmpTimeToHide;
+			
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				
+				LayoutInflater inflater = (LayoutInflater)parent.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View layout = inflater.inflate(R.layout.pref_time_to_hide, null);
+				final SeekBar seekBar = (SeekBar)layout.findViewById(R.id.pref_time_to_hide_seekbar);
+				final TextView valueText = (TextView)layout.findViewById(R.id.pref_time_to_hide_text);
+				
+				_tmpTimeToHide = PrefUtils.getInt(parent, R.string.pref_key_time_to_hide, OverlayMusicPlayerApp.DEFAULT_TIME_TO_HIDE);
+				seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {}
+					
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {}
+					
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						_tmpTimeToHide = progress;
+						String text = getTimeToHideText(parent, _tmpTimeToHide);
+						valueText.setText(text);
+					}
+				});
+				seekBar.setProgress(_tmpTimeToHide);
+				
+				AlertDialog.Builder builder = new AlertDialog.Builder(parent);
+				builder.setTitle(R.string.pref_title_time_to_hide);
+				builder.setView(layout);
+				builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						PrefUtils.setInt(parent, R.string.pref_key_time_to_hide, _tmpTimeToHide);
+						updateTimeToHideSummary();
+						
+						Intent intent = new Intent(parent, OverlayMusicPlayerService.class);
+						intent.setAction(OverlayMusicPlayerService.ACTION_CHANGE_SETTINGS);
+						intent.putExtra(OverlayMusicPlayerService.PRM_SETTING_TYPE, OverlayMusicPlayerService.PRM_TIME_TO_HIDE);
+						parent.startService(intent);
+					}
+				});
+				builder.show();
+
 				return true;
 			}
 		});
@@ -72,12 +127,10 @@ public class SettingsFragment extends PreferenceFragment {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
 				
-				Context context = getActivity();
-				
-				LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				LayoutInflater inflater = (LayoutInflater)parent.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				View layout = inflater.inflate(R.layout.dialog_licenses, null);
 				
-				String license = AssetsUtils.readTextFile(context, "LICENSES.txt");
+				String license = AssetsUtils.readTextFile(parent, "LICENSES.txt");
 				if(TextUtils.isEmpty(license))
 					return true;
 				
@@ -95,5 +148,29 @@ public class SettingsFragment extends PreferenceFragment {
 				return true;
 			}
 		});
+	}
+	
+	private void updateTimeToHideSummary() {
+		Context parent = getActivity();
+		Preference pref = findPreference(parent.getString(R.string.pref_key_time_to_hide));
+		pref.setSummary(getTimeToHideText(
+							parent,
+							PrefUtils.getInt(
+									parent,
+									R.string.pref_key_time_to_hide,
+									OverlayMusicPlayerApp.DEFAULT_TIME_TO_HIDE)));
+
+	}
+	
+	private String getTimeToHideText(Context context, int time) {
+		String summary = null;
+		if(time == 0) {
+			summary = context.getString(R.string.pref_time_to_hide_keep);
+		} else if(time == 1) {
+			summary = "1 " + context.getString(R.string.pref_time_to_hide_minite);
+		} else {
+			summary = time + " " + context.getString(R.string.pref_time_to_hide_minites);
+		}
+		return summary;
 	}
 }

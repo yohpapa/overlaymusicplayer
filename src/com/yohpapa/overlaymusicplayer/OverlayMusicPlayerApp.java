@@ -22,6 +22,8 @@ import android.app.Application;
  * @author YohPapa
  */
 public class OverlayMusicPlayerApp extends Application {
+	
+	public static final int DEFAULT_TIME_TO_HIDE = 5;
 
 	@Override
 	public void onCreate() {

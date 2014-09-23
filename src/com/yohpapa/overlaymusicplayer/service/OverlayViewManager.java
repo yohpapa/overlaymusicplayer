@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.yohpapa.overlaymusicplayer.OverlayMusicPlayerApp;
 import com.yohpapa.overlaymusicplayer.R;
 import com.yohpapa.overlaymusicplayer.activity.MainActivity;
 import com.yohpapa.overlaymusicplayer.adapter.OverlaySongInfoListAdapter;
@@ -46,7 +47,6 @@ import com.yohpapa.tools.TimecodeUtils;
  */
 public class OverlayViewManager {
 	
-	private static final long AUTO_HIDE_TIMEOUT_MS = 5000L;
 	private final int TEXT_COLOR_DARK;
 	private final int TEXT_COLOR_LIGHT;
 	
@@ -455,7 +455,11 @@ public class OverlayViewManager {
 	
 	private void startTimeoutTimer() {
 		stopTimeoutTimer();
-		_timeoutHandler.postDelayed(_onTimerExpired, AUTO_HIDE_TIMEOUT_MS);
+		
+		long timeout = getTimeoutTime();
+		if(timeout > 0) {
+			_timeoutHandler.postDelayed(_onTimerExpired, timeout);
+		}
 	}
 	
 	private final Runnable _onTimerExpired = new Runnable() {
@@ -488,5 +492,17 @@ public class OverlayViewManager {
 		
 		TextView text = (TextView)_panelView.findViewById(R.id.text_position);
 		text.setText(TimecodeUtils.format(position));
+	}
+	
+	private long getTimeoutTime() {
+		return PrefUtils.getInt(
+				_context,
+				R.string.pref_key_time_to_hide, OverlayMusicPlayerApp.DEFAULT_TIME_TO_HIDE) * 1000L;
+	}
+	
+	public void refreshTimeoutTimer() {
+		if(_frontView != null) {
+			startTimeoutTimer();
+		}
 	}
 }

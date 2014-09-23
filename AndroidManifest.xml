@@ -17,8 +17,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.yohpapa.overlaymusicplayer"
-    android:versionCode="018"
-    android:versionName="0.1.8" >
+    android:versionCode="0110"
+    android:versionName="0.1.10" >
     
 	<!--
 	Android 4.4W				20	Android Wear

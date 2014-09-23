@@ -20,8 +20,6 @@
         android:title="@string/pref_category_appearance"
         android:key="@string/pref_key_appearance">
         
-        <!-- Transparency -->
-        
         <!-- Background color -->
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             android:title="@string/pref_title_background_color"
@@ -30,6 +28,12 @@
             android:defaultValue="@color/overlay_panel_background"
             alphaSlider="true" />
         
+        <!-- Time to hide -->
+        <Preference
+            android:title="@string/pref_title_time_to_hide"
+            android:key="@string/pref_key_time_to_hide"
+            android:summary="@string/pref_time_to_hide_keep" />
+    
     </PreferenceCategory>
     
     <PreferenceCategory
