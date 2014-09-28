@@ -368,11 +368,6 @@ public class OverlayViewManager {
 			return;
 		}
 		
-		if(view == _panelView) {
-			View list = _panelView.findViewById(R.id.list_current_songs);
-			list.setVisibility(View.GONE);
-		}
-		
 		hide();
 		_windowManager.addView(view, params);
 		_frontView = view;

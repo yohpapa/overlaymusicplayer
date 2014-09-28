@@ -190,6 +190,7 @@
     <!-- Current selected songs' list -->
     <se.emilsjolander.stickylistheaders.StickyListHeadersListView
         android:id="@+id/list_current_songs"
+        android:visibility="gone"
         android:layout_gravity="right|center_vertical"
         android:layout_width="@dimen/overlay_list_width"
         android:layout_height="@dimen/overlay_list_height" />
